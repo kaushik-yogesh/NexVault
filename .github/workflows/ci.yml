@@ -1,0 +1,87 @@
+name: CI — Lint, Test, Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: cd client && npm ci
+      - run: cd server && npm ci
+      - run: npm run lint
+
+  test-client:
+    name: Client Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: cd client && npm ci
+      - run: cd client && npm run test -- --reporter=verbose
+      - run: cd client && npm run test:coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage/
+
+  test-server:
+    name: Server Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: cd server && npm ci
+      - run: cd server && npm run test -- --reporter=verbose
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test-client, test-server]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: cd client && npm ci
+      - run: cd client && npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extension-build
+          path: client/dist/
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: cd client && npm ci
+      - run: cd server && npm ci
+      - run: cd client && npm audit --audit-level=high || true
+      - run: cd server && npm audit --audit-level=high || true

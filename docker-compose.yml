@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  nexvault-api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/nexvault
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=local-dev-secret-do-not-use-in-prod
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - nexvault-network
+
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - nexvault-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - nexvault-network
+
+volumes:
+  mongo-data:
+  redis-data:
+
+networks:
+  nexvault-network:
+    driver: bridge

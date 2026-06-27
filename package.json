@@ -1,0 +1,40 @@
+{
+  "name": "nexvault",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NexVault — Enterprise Non-Custodial Multi-Chain Crypto Wallet",
+  "workspaces": [
+    "client",
+    "server",
+    "admin",
+    "shared"
+  ],
+  "scripts": {
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "dev:admin": "cd admin && npm run dev",
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\" \"npm run dev:admin\"",
+    "build:client": "cd client && npm run build",
+    "build:server": "echo \"No build required for server\"",
+    "build:admin": "cd admin && npm run build",
+    "build": "npm run build:client && npm run build:server && npm run build:admin",
+    "test": "npm run test:client && npm run test:server",
+    "test:client": "cd client && npm run test",
+    "test:server": "cd server && npm run test",
+    "test:e2e": "cd tests && npx playwright test",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,json,css,md}\"",
+    "seed": "cd server && node seed/index.js",
+    "setup": "npm install && cd client && npm install && cd ../server && npm install && cd ../admin && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

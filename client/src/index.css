@@ -1,0 +1,296 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   NexVault — Base Styles & Custom Utilities
+   ============================================ */
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #020617; /* surface-950 */
+  }
+
+  html.is-extension, html.is-extension body {
+    width: 375px !important;
+    min-width: 375px !important;
+    height: 600px !important;
+    min-height: 600px !important;
+    overflow: hidden;
+  }
+
+  #root {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.3);
+    border-radius: 100px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.5);
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(59, 130, 246, 0.3);
+    color: white;
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* Glassmorphism card */
+  .glass-card {
+    @apply bg-surface-800/50 backdrop-blur-xl border border-surface-700/50 rounded-2xl;
+  }
+
+  .glass-card-hover {
+    @apply bg-surface-800/50 backdrop-blur-xl border border-surface-700/50 rounded-2xl transition-all duration-300 hover:bg-surface-800/70 hover:border-surface-600/50 hover:shadow-glass;
+  }
+
+  /* Gradient backgrounds */
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary-500 to-accent-500;
+  }
+
+  .gradient-primary-subtle {
+    @apply bg-gradient-to-r from-primary-500/10 to-accent-500/10;
+  }
+
+  .gradient-mesh {
+    background: 
+      radial-gradient(at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+      radial-gradient(at 80% 80%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-accent-400;
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl font-semibold text-white
+           bg-gradient-to-r from-primary-500 to-primary-600
+           hover:from-primary-600 hover:to-primary-700
+           active:from-primary-700 active:to-primary-800
+           shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40
+           transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 rounded-xl font-semibold
+           bg-surface-700/50 text-surface-200 border border-surface-600/50
+           hover:bg-surface-700 hover:border-surface-500/50 hover:text-white
+           active:bg-surface-800
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply px-6 py-3 rounded-xl font-semibold text-white
+           bg-gradient-to-r from-danger-500 to-danger-600
+           hover:from-danger-600 hover:to-danger-700
+           shadow-lg shadow-danger-500/25
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 rounded-xl font-medium text-surface-400
+           hover:text-white hover:bg-surface-800/50
+           transition-all duration-200;
+  }
+
+  .btn-icon {
+    @apply p-2.5 rounded-xl
+           bg-surface-800/50 text-surface-400 border border-surface-700/50
+           hover:bg-surface-700/50 hover:text-white hover:border-surface-600/50
+           active:bg-surface-800
+           transition-all duration-200;
+  }
+
+  /* Input styles */
+  .input-base {
+    @apply w-full px-4 py-3 rounded-xl
+           bg-surface-800/50 border border-surface-700/50 text-white
+           placeholder:text-surface-500
+           focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50
+           transition-all duration-200;
+  }
+
+  .input-error {
+    @apply w-full px-4 py-3 rounded-xl bg-surface-800/50 border text-white placeholder:text-surface-500 transition-all duration-200 border-danger-500/50 focus:outline-none focus:ring-2 focus:ring-danger-500/50 focus:border-danger-500/50;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-500/15 text-success-400 border border-success-500/20;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-500/15 text-warning-400 border border-warning-500/20;
+  }
+
+  .badge-danger {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-danger-500/15 text-danger-400 border border-danger-500/20;
+  }
+
+  .badge-info {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-500/15 text-primary-400 border border-primary-500/20;
+  }
+
+  /* Network indicator dot */
+  .network-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .network-dot-connected {
+    @apply w-2 h-2 rounded-full bg-success-400 shadow-[0_0_8px] shadow-success-400/50;
+  }
+
+  .network-dot-disconnected {
+    @apply w-2 h-2 rounded-full bg-danger-400 shadow-[0_0_8px] shadow-danger-400/50;
+  }
+
+  /* Shimmer loading */
+  .shimmer {
+    @apply relative overflow-hidden;
+    background: linear-gradient(
+      90deg,
+      rgba(30, 41, 59, 0.5) 25%,
+      rgba(51, 65, 85, 0.5) 50%,
+      rgba(30, 41, 59, 0.5) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* Token amount display */
+  .token-amount {
+    @apply font-mono font-medium tracking-tight;
+  }
+
+  /* Address display */
+  .address-display {
+    @apply font-mono text-sm text-surface-400 tracking-wide;
+  }
+
+  /* Page container */
+  .page-container {
+    @apply flex flex-col flex-1 px-4 pt-4 pb-4;
+  }
+
+  /* Section header */
+  .section-header {
+    @apply text-sm font-semibold text-surface-400 uppercase tracking-wider mb-3;
+  }
+
+  /* Divider */
+  .divider {
+    @apply border-t border-surface-700/50;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Truncate address: show first 6 and last 4 chars */
+  .truncate-address {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Safe area padding for mobile */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+}
+
+/* ============================================
+   Light Theme Overrides
+   ============================================ */
+html:not(.dark) {
+  #root {
+    @apply bg-white text-surface-900;
+  }
+
+  .glass-card {
+    @apply bg-white/80 border-surface-200/80;
+  }
+
+  .input-base {
+    @apply bg-surface-50 border-surface-200 text-surface-900 placeholder:text-surface-400;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-100 text-surface-700 border-surface-200 hover:bg-surface-200 hover:text-surface-900;
+  }
+
+  .btn-ghost {
+    @apply text-surface-500 hover:text-surface-900 hover:bg-surface-100;
+  }
+
+  .btn-icon {
+    @apply bg-surface-100 text-surface-500 border-surface-200 hover:bg-surface-200 hover:text-surface-900;
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(241, 245, 249, 1) 25%,
+      rgba(226, 232, 240, 1) 50%,
+      rgba(241, 245, 249, 1) 75%
+    );
+    background-size: 200% 100%;
+  }
+}

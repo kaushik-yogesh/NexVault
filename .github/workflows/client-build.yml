@@ -1,0 +1,46 @@
+name: Client Build & Extension Pack
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: 'client/package-lock.json'
+        
+    - name: Install dependencies
+      working-directory: ./client
+      run: npm ci
+      
+    - name: Build Vite App (Manifest V3)
+      working-directory: ./client
+      run: npm run build
+      
+    - name: Package Chrome Extension
+      working-directory: ./client
+      run: |
+        cd dist
+        zip -r ../nexvault-extension.zip *
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: nexvault-extension
+        path: client/nexvault-extension.zip
+        retention-days: 5
