@@ -11,7 +11,7 @@ import {
   HiOutlineGlobeAlt,
 } from 'react-icons/hi2';
 import { useNavigate } from 'react-router-dom';
-import { lockWallet, switchAccount, addAccount } from '../../../features/wallet/walletSlice.js';
+import { performLockWallet, performSwitchAccount, addAccount } from '../../../features/wallet/walletSlice.js';
 import { switchNetwork, selectActiveChain } from '../../../features/network/networkSlice.js';
 import { CHAINS } from '../../../../../shared/constants/chains.js';
 import { HiOutlineLink } from 'react-icons/hi2';
@@ -89,7 +89,7 @@ export default function Header({ onOpenWCModal }) {
 
         {/* Lock button */}
         <button
-          onClick={() => dispatch(lockWallet())}
+          onClick={() => dispatch(performLockWallet())}
           className="btn-icon !p-2"
           title="Lock Wallet"
         >
@@ -173,7 +173,7 @@ export default function Header({ onOpenWCModal }) {
                   <button
                     key={account.address}
                     onClick={() => {
-                      dispatch(switchAccount(account.address));
+                      dispatch(performSwitchAccount(account.address));
                       setShowAccountMenu(false);
                     }}
                     className={`
@@ -204,7 +204,7 @@ export default function Header({ onOpenWCModal }) {
                 
                 <button
                   onClick={() => {
-                    dispatch(addAccount({ name: `Account ${accounts.length + 1}` }));
+                    navigate('/add-account');
                     setShowAccountMenu(false);
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-surface-300 hover:text-white hover:bg-surface-800 transition-all duration-150"

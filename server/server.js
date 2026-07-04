@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 async function startServer() {
   try {
     // Connect to MongoDB
-    try {
+    try { 
       await connectDB();
       logger.info('✅ MongoDB connected');
     } catch (dbError) {

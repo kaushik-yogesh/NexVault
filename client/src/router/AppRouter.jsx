@@ -21,6 +21,7 @@ const ReceiveModal = lazy(() => import('../features/receive/components/ReceiveMo
 const ExplorePage = lazy(() => import('../features/explore/components/ExplorePage.jsx'));
 const TransactionHistory = lazy(() => import('../features/history/components/TransactionHistory.jsx'));
 const SettingsPage = lazy(() => import('../features/settings/components/SettingsPage.jsx'));
+const AddAccountPage = lazy(() => import('../features/wallet/components/AddAccountPage.jsx'));
 const ImportAccountPage = lazy(() => import('../features/wallet/components/ImportAccountPage.jsx'));
 const ConnectHardware = lazy(() => import('../features/wallet/components/ConnectHardware.jsx'));
 const AddressBookPage = lazy(() => import('../features/contacts/components/AddressBookPage.jsx'));
@@ -113,6 +114,7 @@ export default function AppRouter() {
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/history" element={<TransactionHistory />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/add-account" element={<AddAccountPage />} />
           <Route path="/import-account" element={<ImportAccountPage />} />
           <Route path="/connect-hardware" element={<ConnectHardware />} />
           <Route path="/contacts" element={<AddressBookPage />} />

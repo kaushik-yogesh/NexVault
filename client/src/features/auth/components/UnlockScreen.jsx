@@ -9,15 +9,20 @@ import { motion } from 'framer-motion';
 import { HiOutlineLockClosed } from 'react-icons/hi2';
 import Input from '../../../shared/components/ui/Input.jsx';
 import Button from '../../../shared/components/ui/Button.jsx';
-import { unlockWallet, clearError } from '../../wallet/walletSlice.js';
+import { unlockWallet, unlockWithBiometric, checkBiometricStatus, clearError } from '../../wallet/walletSlice.js';
+import { HiOutlineFingerPrint } from 'react-icons/hi2';
 
 export default function UnlockScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const { isLoading, error, isUnlocked, isInitialized } = useSelector((state) => state.wallet);
+  const { isLoading, error, isUnlocked, isInitialized, hasBiometricEnabled } = useSelector((state) => state.wallet);
   const [password, setPassword] = useState('');
   const [attempts, setAttempts] = useState(0);
+
+  useEffect(() => {
+    dispatch(checkBiometricStatus());
+  }, [dispatch]);
 
   useEffect(() => {
     if (!isInitialized) {
@@ -44,6 +49,14 @@ export default function UnlockScreen() {
     } else {
       setAttempts((prev) => prev + 1);
       setPassword('');
+    }
+  };
+
+  const handleBiometricUnlock = async () => {
+    dispatch(clearError());
+    const result = await dispatch(unlockWithBiometric());
+    if (unlockWithBiometric.fulfilled.match(result)) {
+      navigate(`/dashboard${location.search}`);
     }
   };
 
@@ -93,15 +106,41 @@ export default function UnlockScreen() {
             </div>
           )}
 
-          <Button
-            type="submit"
-            fullWidth
-            size="lg"
-            loading={isLoading}
-            disabled={!password.trim()}
-          >
-            Unlock
-          </Button>
+          {hasBiometricEnabled ? (
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Button
+                  type="submit"
+                  fullWidth
+                  size="lg"
+                  loading={isLoading}
+                  disabled={!password.trim() && !isLoading}
+                >
+                  Unlock
+                </Button>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={handleBiometricUnlock}
+                disabled={isLoading}
+                className="px-4"
+              >
+                <HiOutlineFingerPrint className="w-6 h-6 text-primary-400" />
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="submit"
+              fullWidth
+              size="lg"
+              loading={isLoading}
+              disabled={!password.trim() && !isLoading}
+            >
+              Unlock
+            </Button>
+          )}
         </form>
 
         {attempts >= 5 && (

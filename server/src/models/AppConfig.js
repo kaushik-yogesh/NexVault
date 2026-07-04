@@ -14,8 +14,11 @@ const appConfigSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['FEE', 'RPC', 'FEATURE_FLAG', 'TREASURY'],
       required: true,
+    },
+    category: {
+      type: String,
+      default: 'GENERAL',
     },
     description: {
       type: String,

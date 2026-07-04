@@ -10,9 +10,11 @@ import { motion } from 'framer-motion';
 import { HiOutlineKey, HiOutlineCommandLine } from 'react-icons/hi2';
 import Input from '../../../shared/components/ui/Input.jsx';
 import Button from '../../../shared/components/ui/Button.jsx';
-import { importPrivateKey, importKeystore } from '../walletSlice.js';
+import { importPrivateKey, importKeystore, importSeedPhraseAccount } from '../walletSlice.js';
+import { HiOutlineDocumentText } from 'react-icons/hi2';
 
 const TABS = [
+  { id: 'seed', label: 'Seed Phrase', icon: HiOutlineDocumentText },
   { id: 'privateKey', label: 'Private Key', icon: HiOutlineKey },
   { id: 'keystore', label: 'JSON Keystore', icon: HiOutlineCommandLine },
 ];
@@ -22,12 +24,14 @@ export default function ImportAccountPage() {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.wallet);
 
-  const [activeTab, setActiveTab] = useState('privateKey');
+  const [activeTab, setActiveTab] = useState('seed');
   const [password, setPassword] = useState('');
+  const [seedPhrase, setSeedPhrase] = useState('');
   const [privateKey, setPrivateKey] = useState('');
   const [keystoreJson, setKeystoreJson] = useState('');
   const [keystorePassword, setKeystorePassword] = useState('');
   const [accountName, setAccountName] = useState('');
+  const [accountIndex, setAccountIndex] = useState(0);
   const [errors, setErrors] = useState({});
 
   const handleImportKey = async (e) => {
@@ -68,6 +72,23 @@ export default function ImportAccountPage() {
     }
   };
 
+  const handleImportSeed = async (e) => {
+    e.preventDefault();
+    if (!password) {
+      setErrors({ password: 'Password is required to decrypt vault' });
+      return;
+    }
+
+    const name = accountName.trim() || `Imported Seed Account`;
+
+    const result = await dispatch(importSeedPhraseAccount({ password, mnemonic: seedPhrase, accountIndex: Number(accountIndex), name }));
+    if (importSeedPhraseAccount.fulfilled.match(result)) {
+      navigate('/dashboard');
+    } else {
+      setErrors({ form: result.payload || 'Failed to import seed phrase' });
+    }
+  };
+
 
   return (
     <div className="flex flex-col h-full px-4 py-4">
@@ -101,6 +122,70 @@ export default function ImportAccountPage() {
             </button>
           ))}
         </div>
+
+        {activeTab === 'seed' && (
+          <form onSubmit={handleImportSeed} className="space-y-4">
+            <Input
+              label="Account Name (Optional)"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
+              placeholder="e.g. Trading Wallet"
+            />
+            
+            <div>
+              <label className="block text-sm font-medium text-surface-300 mb-1.5">
+                Recovery Phrase
+              </label>
+              <textarea
+                value={seedPhrase}
+                onChange={(e) => setSeedPhrase(e.target.value)}
+                placeholder="Enter your 12 or 24 word recovery phrase..."
+                rows={3}
+                className="input-base resize-none font-mono text-sm"
+                spellCheck="false"
+                autoComplete="off"
+              />
+            </div>
+
+            <Input
+              label="Account Index"
+              type="number"
+              value={accountIndex}
+              onChange={(e) => setAccountIndex(e.target.value)}
+              hint="Which account to derive from the seed phrase (default: 0)"
+            />
+
+            <Input
+              label="Vault Password"
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setErrors({}); }}
+              error={errors.password}
+              placeholder="Enter your wallet password to unlock"
+            />
+
+            {errors.form && (
+              <div className="p-3 rounded-xl bg-danger-500/10 border border-danger-500/20 text-sm text-danger-400">
+                {errors.form}
+              </div>
+            )}
+            {error && !errors.form && (
+              <div className="p-3 rounded-xl bg-danger-500/10 border border-danger-500/20 text-sm text-danger-400">
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              fullWidth
+              size="lg"
+              loading={isLoading}
+              disabled={!seedPhrase.trim() || !password}
+            >
+              Import Account
+            </Button>
+          </form>
+        )}
 
         {activeTab === 'privateKey' && (
           <form onSubmit={handleImportKey} className="space-y-4">

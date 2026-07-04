@@ -6,6 +6,7 @@ import Users from './pages/Users';
 import Swaps from './pages/Swaps';
 import Config from './pages/Config';
 import Security from './pages/Security';
+import Transfers from './pages/Transfers';
 import Layout from './components/Layout';
 
 const ProtectedRoute = ({ children }) => {
@@ -29,6 +30,7 @@ function App() {
         <Route index element={<Dashboard />} />
         <Route path="users" element={<Users />} />
         <Route path="swaps" element={<Swaps />} />
+        <Route path="transfers" element={<Transfers />} />
         <Route path="config" element={<Config />} />
         <Route path="security" element={<Security />} />
       </Route>

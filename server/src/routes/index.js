@@ -12,6 +12,8 @@ import adminAuthRoutes from './admin-auth.routes.js';
 import auditRoutes from './audit.routes.js';
 import transactionRoutes from './transaction.routes.js';
 import walletRoutes from './wallet.routes.js';
+import pricingRoutes from './pricing.routes.js';
+import configRoutes from './config.routes.js';
 
 const router = Router();
 
@@ -22,6 +24,8 @@ router.use('/swap', swapRoutes);
 router.use('/security', securityRoutes);
 router.use('/transactions', transactionRoutes);
 router.use('/wallet', walletRoutes);
+router.use('/pricing', pricingRoutes);
+router.use('/config', configRoutes);
 
 // Admin Public routes
 router.use('/admin/auth', adminAuthRoutes);

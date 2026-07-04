@@ -5,7 +5,8 @@ import {
   FiRepeat, 
   FiSettings, 
   FiShield, 
-  FiDatabase 
+  FiDatabase,
+  FiSend
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
@@ -13,6 +14,7 @@ const menuItems = [
   { name: 'Dashboard', path: '/', icon: FiHome },
   { name: 'Users', path: '/users', icon: FiUsers },
   { name: 'Swaps', path: '/swaps', icon: FiRepeat },
+  { name: 'Transfers', path: '/transfers', icon: FiSend },
   { name: 'Configuration', path: '/config', icon: FiSettings },
   { name: 'Security Center', path: '/security', icon: FiShield },
 ];

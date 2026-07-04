@@ -25,47 +25,25 @@ class ProviderManager {
   /**
    * Get a provider for a specific chain
    * Uses caching — returns existing provider if available.
+   * Utilizes ethers.FallbackProvider for enterprise-grade failover and health checks.
    * 
    * @param {string} chainId - Hex chain ID
-   * @returns {ethers.JsonRpcProvider}
+   * @returns {ethers.FallbackProvider}
    */
   getProvider(chainId = activeChainId) {
-    const cacheKey = chainId;
+    const hexId = this._normalizeChainId(chainId);
+    const cacheKey = hexId;
 
     if (providerCache.has(cacheKey)) {
       return providerCache.get(cacheKey);
     }
 
-    const chain = CHAINS[chainId];
+    const chain = CHAINS[hexId];
     if (!chain) {
       throw new Error(`NETWORK_UNSUPPORTED: Chain ${chainId} not found`);
     }
 
-    // Check for custom RPC override
-    const rpcUrl = customRPCs[chainId] || chain.rpcUrls.primary;
-
-    const provider = new ethers.JsonRpcProvider(rpcUrl, chain.chainIdDecimal, {
-      staticNetwork: true, // Avoid unnecessary eth_chainId calls
-      batchMaxCount: 10,
-    });
-
-    providerCache.set(cacheKey, provider);
-    return provider;
-  }
-
-  /**
-   * Get a provider with fallback support
-   * Tries primary, then secondary, then fallback RPC.
-   * 
-   * @param {string} chainId - Hex chain ID
-   * @returns {Promise<ethers.JsonRpcProvider>}
-   */
-  async getProviderWithFallback(chainId = activeChainId) {
-    const chain = CHAINS[chainId];
-    if (!chain) {
-      throw new Error(`NETWORK_UNSUPPORTED: Chain ${chainId} not found`);
-    }
-
+    // Determine RPC URLs
     const rpcUrls = [
       customRPCs[chainId],
       chain.rpcUrls.primary,
@@ -73,24 +51,44 @@ class ProviderManager {
       chain.rpcUrls.fallback,
     ].filter(Boolean);
 
-    for (const rpcUrl of rpcUrls) {
-      try {
-        const provider = new ethers.JsonRpcProvider(rpcUrl, chain.chainIdDecimal, {
-          staticNetwork: true,
-        });
-        // Quick health check
-        await provider.getBlockNumber();
+    // Create unique list of URLs to avoid duplicate connections
+    const uniqueRpcUrls = [...new Set(rpcUrls)];
 
-        // Cache the working provider
-        providerCache.set(chainId, provider);
-        return provider;
-      } catch (error) {
-        console.warn(`RPC failed for ${chain.name}: ${rpcUrl}`, error.message);
-        continue;
-      }
-    }
+    // Create a vanilla network object to bypass ethers v6 default plugins
+    // (e.g. PolygonGasStationPlugin) which are known to cause 'quorum not met' errors.
+    const customNetwork = new ethers.Network(chain.name, chain.chainIdDecimal);
 
-    throw new Error(`NETWORK_ALL_RPC_FAILED: All RPCs failed for ${chain.name}`);
+    // Initialize individual providers
+    const providers = uniqueRpcUrls.map((url, index) => {
+      const provider = new ethers.JsonRpcProvider(url, customNetwork, {
+        staticNetwork: true, // Avoid unnecessary eth_chainId calls
+        batchMaxCount: 10,   // Request batching
+      });
+      return {
+        provider,
+        priority: index, // 0 is highest priority
+        weight: 1,
+        stallTimeout: 3000, // Trigger failover if response takes >3s
+      };
+    });
+
+    // Create robust FallbackProvider
+    const fallbackProvider = new ethers.FallbackProvider(providers, customNetwork);
+
+    providerCache.set(cacheKey, fallbackProvider);
+    return fallbackProvider;
+  }
+
+  /**
+   * Get a provider with fallback support
+   * Since getProvider now returns a robust FallbackProvider, we just alias it
+   * to maintain 100% backward compatibility with existing code.
+   * 
+   * @param {string} chainId - Hex chain ID
+   * @returns {Promise<ethers.FallbackProvider>}
+   */
+  async getProviderWithFallback(chainId = activeChainId) {
+    return this.getProvider(chainId);
   }
 
   /**
@@ -101,16 +99,29 @@ class ProviderManager {
     return this.getProvider(activeChainId);
   }
 
+  _normalizeChainId(chainId) {
+    let hexId = chainId;
+    if (typeof chainId === 'number') {
+      hexId = `0x${chainId.toString(16)}`;
+    } else if (typeof chainId === 'string' && !chainId.startsWith('0x') && !isNaN(Number(chainId))) {
+      hexId = `0x${Number(chainId).toString(16)}`;
+    } else if (typeof chainId === 'string') {
+      hexId = chainId.toLowerCase();
+    }
+    return hexId;
+  }
+
   /**
    * Switch the active chain
    * @param {string} chainId - Hex chain ID
    * @returns {ethers.JsonRpcProvider}
    */
   switchChain(chainId) {
-    if (!CHAINS[chainId] && !customRPCs[chainId]) {
+    const hexId = this._normalizeChainId(chainId);
+    if (!CHAINS[hexId] && !customRPCs[hexId]) {
       throw new Error(`NETWORK_UNSUPPORTED: Chain ${chainId} not supported`);
     }
-    activeChainId = chainId;
+    activeChainId = hexId;
     return this.getProvider(chainId);
   }
 
@@ -195,13 +206,76 @@ class ProviderManager {
   }
 
   /**
+   * Get multiple ERC-20 token balances using Multicall3
+   * Automatically falls back to individual calls if Multicall is unsupported.
+   * 
+   * @param {string} address - Wallet address
+   * @param {Array<{address: string, decimals: number}>} tokens - Array of token objects
+   * @param {string} chainId - Chain ID
+   * @returns {Promise<string[]>} Array of formatted balances
+   */
+  async getMultipleTokenBalances(address, tokens, chainId = activeChainId) {
+    if (!tokens || tokens.length === 0) return [];
+
+    const provider = this.getProvider(chainId);
+    const multicallAddress = '0xcA11bde05977b3631167028862bE2a173976CA11'; // Multicall3 is universal
+    
+    try {
+      const ERC20_ABI = ['function balanceOf(address) view returns (uint256)'];
+      const itf = new ethers.Interface(ERC20_ABI);
+      
+      const calls = tokens.map(token => ({
+        target: token.address,
+        callData: itf.encodeFunctionData('balanceOf', [address])
+      }));
+
+      const MULTICALL_ABI = [
+        'function tryAggregate(bool requireSuccess, tuple(address target, bytes callData)[] calls) view returns (tuple(bool success, bytes returnData)[] returnData)'
+      ];
+      
+      const multicall = new ethers.Contract(multicallAddress, MULTICALL_ABI, provider);
+
+      // Timeout wrapper to prevent hanging RPCs
+      const fetchPromise = multicall.tryAggregate(false, calls);
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('RPC_TIMEOUT')), 5000));
+      
+      const results = await Promise.race([fetchPromise, timeoutPromise]);
+      
+      return results.map((result, i) => {
+        if (result.success && result.returnData !== '0x') {
+          try {
+            const balance = itf.decodeFunctionResult('balanceOf', result.returnData)[0];
+            return ethers.formatUnits(balance, tokens[i].decimals);
+          } catch {
+            return '0';
+          }
+        }
+        return '0';
+      });
+    } catch (error) {
+      console.warn(`Multicall failed on chain ${chainId}, falling back to sequential...`, error.message);
+      // Fallback to sequential execution if Multicall fails or times out
+      return await Promise.all(
+        tokens.map(async (token) => {
+          try {
+            return await this.getTokenBalance(address, token.address, token.decimals, chainId);
+          } catch {
+            return '0';
+          }
+        })
+      );
+    }
+  }
+
+  /**
    * Get current gas price info
    * @param {string} chainId - Chain ID
    * @returns {Promise<Object>} Gas price data
    */
   async getGasPrice(chainId = activeChainId) {
-    const provider = this.getProvider(chainId);
-    const chain = CHAINS[chainId];
+    const hexId = this._normalizeChainId(chainId);
+    const provider = this.getProvider(hexId);
+    const chain = CHAINS[hexId];
 
     if (chain?.supportsEIP1559) {
       const feeData = await provider.getFeeData();

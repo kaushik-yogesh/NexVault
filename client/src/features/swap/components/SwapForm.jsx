@@ -11,6 +11,9 @@ import transactionController from '../../../core/network/TransactionController.j
 import keyringController from '../../../core/wallet/KeyringController.js';
 import { selectTokensByChain } from '../../tokens/tokensSlice.js';
 import { selectActiveChain } from '../../network/networkSlice.js';
+import { ethers } from 'ethers';
+import providerManager from '../../../core/network/ProviderManager.js';
+import gasEstimator from '../../../core/network/GasEstimator.js';
 
 export default function SwapForm() {
   const { activeAddress, balances } = useSelector((state) => state.wallet);
@@ -22,6 +25,7 @@ export default function SwapForm() {
   const tokenParam = searchParams.get('from');
 
   const globalPrices = useSelector((state) => state.pricing.prices);
+  const { SLIPPAGE_DEFAULT, ENABLE_SWAP } = useSelector((state) => state.config.data);
 
   const [sellToken, setSellToken] = useState(tokenParam || 'native');
   const [buyToken, setBuyToken] = useState(tokens.length > 0 ? tokens[0].address : '');
@@ -29,16 +33,34 @@ export default function SwapForm() {
   const [sellAmount, setSellAmount] = useState('');
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [slippage, setSlippage] = useState(1.0);
+  const [slippage, setSlippage] = useState(SLIPPAGE_DEFAULT || 1.0);
+  
+  // Gas Reserve States
+  const [baseGasEstimate, setBaseGasEstimate] = useState('0');
+  const { GAS_RESERVE_MIN, GAS_RESERVE_PERCENT, GAS_LIMIT_FALLBACK_SWAP } = useSelector((state) => state.config.data);
   
   // Custom token selector state
   const [tokenSelectorType, setTokenSelectorType] = useState(null); // 'sell' or 'buy'
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Derive symbols & balances
   const getSymbol = (addr) => {
     if (addr === 'native') return activeChain?.nativeCurrency?.symbol || 'ETH';
     return tokens.find(t => t.address === addr)?.symbol || '...';
   };
+
+  const logSwapEvent = async (payload) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      await fetch(`${apiUrl}/swap/history`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.warn("Failed to log swap event", e);
+    }
+  };
+
   
   const getBalance = (addr) => {
     if (addr === 'native') return balances?.[activeAddress]?.[activeChainId]?.native || '0';
@@ -57,9 +79,80 @@ export default function SwapForm() {
   const sellIcon = getIcon(sellToken);
   const buyIcon = getIcon(buyToken);
 
+  const fetchDecimals = async (addr) => {
+    if (addr === 'native') return 18;
+    const found = tokens.find(t => t.address.toLowerCase() === addr.toLowerCase());
+    if (found && found.decimals !== undefined) return found.decimals;
+    
+    try {
+      const provider = providerManager.getProvider(activeChainId);
+      const contract = new ethers.Contract(addr, ["function decimals() view returns (uint8)"], provider);
+      return await contract.decimals();
+    } catch (err) {
+      console.warn(`Failed to fetch decimals for ${addr}, defaulting to 18`, err);
+      return 18;
+    }
+  };
+
+  const checkAndApproveToken = async (tokenAddress, amount, routerAddress, signer) => {
+    if (tokenAddress === 'native') return true; // Native token doesn't need approval
+
+    const erc20Abi = [
+      "function allowance(address owner, address spender) view returns (uint256)",
+      "function approve(address spender, uint256 amount) returns (bool)"
+    ];
+    
+    const contract = new ethers.Contract(tokenAddress, erc20Abi, signer);
+    const ownerAddress = await signer.getAddress();
+    
+    const allowance = await contract.allowance(ownerAddress, routerAddress);
+    
+    const tokenDecimals = await fetchDecimals(tokenAddress);
+    const requiredAmount = ethers.parseUnits(amount.toString(), tokenDecimals);
+
+    if (allowance < requiredAmount) {
+      toast.loading('Approving token for swap...', { id: 'swap_approve' });
+      try {
+        // Request max approval to avoid repeated prompts
+        const tx = await contract.approve(routerAddress, ethers.MaxUint256);
+        await tx.wait(1);
+        toast.success('Token approved successfully!', { id: 'swap_approve' });
+        return true;
+      } catch (err) {
+        console.error('Approval error:', err);
+        toast.error('Token approval failed or rejected', { id: 'swap_approve' });
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  // Fetch base gas estimate for dynamic MAX calculation
+  useEffect(() => {
+    let isMounted = true;
+    const fetchBaseGas = async () => {
+      try {
+        const fallbackLimit = BigInt(GAS_LIMIT_FALLBACK_SWAP || 500000);
+        const estimate = await gasEstimator.estimateBaseGas(activeChainId, fallbackLimit);
+        if (isMounted) setBaseGasEstimate(estimate.gasCostFormatted);
+      } catch (err) {
+        console.warn('Failed to fetch base gas estimate', err);
+      }
+    };
+    fetchBaseGas();
+    
+    // Set up an interval to keep it somewhat fresh
+    const interval = setInterval(fetchBaseGas, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [activeChainId, GAS_LIMIT_FALLBACK_SWAP]);
+
   // Debounced quote fetch
   useEffect(() => {
-    if (!sellAmount || Number(sellAmount) <= 0 || !sellToken || !buyToken) {
+    if (!activeAddress || !sellAmount || Number(sellAmount) <= 0 || !sellToken || !buyToken) {
       setQuote(null);
       return;
     }
@@ -70,13 +163,8 @@ export default function SwapForm() {
         const sPrice = sellToken === 'native' ? (globalPrices?.[activeChainId]?.native?.price || 0) : (globalPrices?.[activeChainId]?.[sellToken.toLowerCase()]?.price || 0);
         const bPrice = buyToken === 'native' ? (globalPrices?.[activeChainId]?.native?.price || 0) : (globalPrices?.[activeChainId]?.[buyToken.toLowerCase()]?.price || 0);
 
-        const getDecimals = (addr) => {
-          if (addr === 'native') return 18;
-          return tokens.find(t => t.address.toLowerCase() === addr.toLowerCase())?.decimals || 18;
-        };
-
-        const sDecimals = getDecimals(sellToken);
-        const bDecimals = getDecimals(buyToken);
+        const sDecimals = await fetchDecimals(sellToken);
+        const bDecimals = await fetchDecimals(buyToken);
 
         const result = await swapService.getQuote(
           activeChainId,
@@ -86,7 +174,7 @@ export default function SwapForm() {
           slippage,
           sPrice,
           bPrice,
-          '',
+          activeAddress,
           sDecimals,
           bDecimals
         );
@@ -94,6 +182,16 @@ export default function SwapForm() {
       } catch (error) {
         console.error(error);
         toast.error('Failed to fetch quote');
+        logSwapEvent({
+          status: 'FAILED',
+          walletAddress: activeAddress,
+          chainId: activeChainId,
+          networkName: activeChain?.name,
+          sellToken, buyToken, sellAmount,
+          failureStage: 'QUOTE',
+          failureReason: 'Quote Failed',
+          errorMessage: error.message
+        });
       } finally {
         setIsLoading(false);
       }
@@ -103,23 +201,75 @@ export default function SwapForm() {
   }, [sellAmount, sellToken, buyToken, activeChainId, slippage]);
 
   const handleSwap = async () => {
-    if (!quote || !activeAddress || !quote._internalRoute) {
+    if (!activeAddress) {
+      toast.error('Wallet disconnected');
+      return;
+    }
+    if (!quote || !quote._internalRoute) {
       toast.error('Invalid swap quote');
       return;
     }
     
     setIsLoading(true);
-    toast.loading('Confirming transaction...', { id: 'swap' });
     
     try {
-      const signer = keyringController.getActiveSigner();
+      // Pre-flight Gas Reserve Validation
+      if (sellToken === 'native') {
+        const requiredGas = quote.estimatedGas && quote.gasPriceWei 
+            ? parseFloat(ethers.formatEther(BigInt(quote.estimatedGas) * BigInt(quote.gasPriceWei))) 
+            : parseFloat(baseGasEstimate);
+        
+        const safetyBuffer = requiredGas * ((GAS_RESERVE_PERCENT || 10) / 100);
+        const minimumReserve = parseFloat(GAS_RESERVE_MIN || 0.005);
+        const finalReserve = Math.max(requiredGas + safetyBuffer, minimumReserve);
+        
+        const requiredBalance = parseFloat(sellAmount) + finalReserve;
+        const currentBalance = parseFloat(sellBalance);
+
+        if (currentBalance < requiredBalance) {
+          toast.error(
+            `Insufficient ${activeChain?.nativeCurrency?.symbol || 'Native'} balance.\n\nRequired: ${requiredBalance.toFixed(4)}\nAvailable: ${currentBalance.toFixed(4)}\nGas Reserve: ${finalReserve.toFixed(4)}\n\nReduce the swap amount or add more funds.`,
+            { id: 'swap_tx', duration: 6000 }
+          );
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      const rawSigner = keyringController.getActiveSigner();
+      const provider = providerManager.getProvider(activeChainId);
+      const signer = rawSigner.connect(provider);
+      
+      const routerAddress = quote._internalRoute?.routerAddress;
+      if (!routerAddress) throw new Error("Router address not provided by quote. Please try fetching the quote again.");
+      
+      const isApproved = await checkAndApproveToken(sellToken, sellAmount, routerAddress, signer);
+      if (!isApproved) {
+        setIsLoading(false);
+        return;
+      }
+
+      toast.loading('Fetching fresh route...', { id: 'swap_tx' });
+      
+      const sPrice = sellToken === 'native' ? (globalPrices?.[activeChainId]?.native?.price || 0) : (globalPrices?.[activeChainId]?.[sellToken.toLowerCase()]?.price || 0);
+      const bPrice = buyToken === 'native' ? (globalPrices?.[activeChainId]?.native?.price || 0) : (globalPrices?.[activeChainId]?.[buyToken.toLowerCase()]?.price || 0);
+      const sDecimals = await fetchDecimals(sellToken);
+      const bDecimals = await fetchDecimals(buyToken);
+
+      // Re-fetch quote to prevent stale payload revert due to delay from token approval
+      const freshQuote = await swapService.getQuote(
+        activeChainId, sellToken, buyToken, sellAmount, slippage,
+        sPrice, bPrice, activeAddress, sDecimals, bDecimals
+      );
+
+      toast.loading('Confirming transaction...', { id: 'swap_tx' });
       
       const txData = swapService.buildTransaction(
         activeChainId,
         sellToken,
         buyToken,
         activeAddress,
-        quote._internalRoute
+        freshQuote._internalRoute
       );
 
       const txRequest = {
@@ -127,16 +277,59 @@ export default function SwapForm() {
         data: txData.data,
         value: txData.value,
         chainId: activeChainId,
+        metadata: {
+          type: 'SWAP',
+          assetType: sellToken === 'native' ? 'NATIVE' : 'ERC20',
+          tokenAddress: sellToken !== 'native' ? sellToken : undefined,
+          value: sellAmount,
+          usdValue: parseFloat(sellAmount) * sPrice,
+          platformFee: freshQuote.platformFeePercentage ? `${freshQuote.platformFeePercentage}%` : '0'
+        }
       };
 
-      await transactionController.processTransaction(signer, txRequest, true);
+      const txResponse = await transactionController.processTransaction(signer, txRequest, true);
       
-      toast.success('Swap submitted successfully!', { id: 'swap' });
+      toast.success('Swap submitted successfully!', { id: 'swap_tx' });
+      
+      logSwapEvent({
+        txHash: txResponse.hash,
+        status: 'PENDING',
+        walletAddress: activeAddress,
+        chainId: activeChainId,
+        networkName: activeChain?.name,
+        sellToken, buyToken, sellAmount,
+        buyAmount: quote.buyAmount,
+        minReceived: quote.minReceived,
+        slippage,
+        priceImpact: quote.priceImpact,
+        platformFeePercentage: quote.platformFeePercentage,
+        platformFeeAmount: quote.platformFeeAmount,
+        feeToken: sellToken,
+        aggregator: 'KyberSwap Aggregator',
+        routerAddress: quote._internalRoute?.routerAddress
+      });
+
       setSellAmount('');
       setQuote(null);
     } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Swap failed', { id: 'swap' });
+      if (err.message.includes('INSUFFICIENT_FUNDS') || err.message.includes('insufficient funds for gas')) {
+        toast.error('Insufficient funds to cover network gas fees.');
+      } else {
+        toast.error(err.message || 'Swap failed. Please try again.', { id: 'swap_tx' });
+      }
+      
+      logSwapEvent({
+        status: 'FAILED',
+        walletAddress: activeAddress,
+        chainId: activeChainId,
+        networkName: activeChain?.name,
+        sellToken, buyToken, sellAmount,
+        buyAmount: quote?.buyAmount,
+        failureStage: err.message?.includes('Router') ? 'BUILD' : 'SIGNING',
+        failureReason: 'Swap Execution Failed',
+        errorMessage: err.message
+      });
     } finally {
       setIsLoading(false);
     }
@@ -151,8 +344,21 @@ export default function SwapForm() {
 
   const handleMax = () => {
     if (sellToken === 'native') {
-      const max = Math.max(0, Number(sellBalance) - 0.005);
-      setSellAmount(max > 0 ? max.toString() : '0');
+      const estimatedGas = quote && quote.estimatedGas && quote.gasPriceWei 
+          ? parseFloat(ethers.formatEther(BigInt(quote.estimatedGas) * BigInt(quote.gasPriceWei))) 
+          : parseFloat(baseGasEstimate || 0);
+
+      const safetyBuffer = estimatedGas * ((GAS_RESERVE_PERCENT || 10) / 100);
+      const minimumReserve = parseFloat(GAS_RESERVE_MIN || 0.005);
+      const finalReserve = Math.max(estimatedGas + safetyBuffer, minimumReserve);
+
+      const max = Math.max(0, Number(sellBalance) - finalReserve);
+      
+      if (max <= 0 && Number(sellBalance) > 0) {
+        toast.error(`Not enough ${activeChain?.nativeCurrency?.symbol || 'balance'} to cover gas reserves.`);
+      }
+      
+      setSellAmount(max > 0 ? max.toFixed(6) : '0');
     } else {
       setSellAmount(sellBalance.toString());
     }
@@ -222,12 +428,24 @@ export default function SwapForm() {
       >
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-lg font-bold text-white">Swap Tokens</h2>
-          <button className="p-2 hover:bg-surface-800 rounded-full text-surface-400 hover:text-white transition-colors">
+          <button 
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-2 hover:bg-surface-800 rounded-full text-surface-400 hover:text-white transition-colors"
+          >
             <FiSettings size={20} />
           </button>
         </div>
 
-        <div className="flex-1 space-y-4">
+        {ENABLE_SWAP === false ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-surface-800/30 border border-surface-700/50 rounded-2xl">
+            <div className="w-16 h-16 bg-surface-800 rounded-full flex items-center justify-center mb-4 border border-surface-700">
+              <span className="text-2xl">🚧</span>
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Swaps Disabled</h3>
+            <p className="text-surface-400">The swap feature is currently disabled for maintenance. Please check back later.</p>
+          </div>
+        ) : (
+          <div className="flex-1 space-y-4">
           {/* Sell Input Card */}
           <div className="bg-surface-800/30 border border-surface-700/50 rounded-2xl p-4 transition-colors focus-within:border-primary-500/50 relative">
             <div className="flex justify-between mb-2">
@@ -329,8 +547,21 @@ export default function SwapForm() {
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-surface-400 font-medium">Platform Fee ({quote.platformFeePercentage}%)</span>
-                <span className="text-surface-200 font-semibold">{quote.platformFeeAmount}</span>
+                <span className="text-surface-400 font-medium">Slippage Tolerance</span>
+                <span 
+                  className="font-semibold text-primary-400 cursor-pointer hover:text-primary-300 underline decoration-primary-400/30 underline-offset-4"
+                  onClick={() => setIsSettingsOpen(true)}
+                >
+                  {slippage}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-surface-400 font-medium">Platform Fee</span>
+                <span className="text-surface-200 font-semibold text-right">
+                  {quote.platformFeePercentage > 0 
+                    ? `${quote.platformFeePercentage}% (Configured by Admin)` 
+                    : 'Disabled'}
+                </span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-surface-400 font-medium">Est. Network Fee</span>
@@ -361,6 +592,7 @@ export default function SwapForm() {
             </Button>
           </div>
         </div>
+        )}
       </motion.div>
 
       <Modal isOpen={!!tokenSelectorType} onClose={() => setTokenSelectorType(null)} title="Select a token">
@@ -393,6 +625,43 @@ export default function SwapForm() {
               />
             );
           })}
+        </div>
+      </Modal>
+
+      <Modal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title="Swap Settings">
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium text-surface-400 mb-2 block">Slippage Tolerance</label>
+            <div className="flex items-center gap-2 mb-3">
+              {[0.1, 0.5, 1.0, 3.0].map(val => (
+                <button
+                  key={val}
+                  onClick={() => setSlippage(val)}
+                  className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${Number(slippage) === val ? 'bg-primary-500 text-white' : 'bg-surface-800 text-surface-300 hover:bg-surface-700'}`}
+                >
+                  {val}%
+                </button>
+              ))}
+              <div className={`flex items-center bg-surface-800 rounded-xl px-3 py-1.5 border transition-colors ${![0.1, 0.5, 1.0, 3.0].includes(Number(slippage)) ? 'border-primary-500 text-white' : 'border-transparent text-surface-300 focus-within:border-surface-600'}`}>
+                <input 
+                  type="text" 
+                  value={slippage} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '' || /^\d*\.?\d*$/.test(val)) setSlippage(val);
+                  }}
+                  className="bg-transparent outline-none w-12 text-right text-sm"
+                />
+                <span className="ml-1 text-sm">%</span>
+              </div>
+            </div>
+            {Number(slippage) > 5 && (
+              <div className="text-xs text-warning-400 mt-2">High slippage! Your transaction may be frontrun.</div>
+            )}
+            {Number(slippage) < 0.1 && slippage !== '' && (
+              <div className="text-xs text-danger-400 mt-2">Your transaction may fail due to low slippage.</div>
+            )}
+          </div>
         </div>
       </Modal>
     </div>

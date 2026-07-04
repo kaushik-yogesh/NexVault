@@ -42,38 +42,109 @@ export default function Dashboard() {
   
   const tokens = useSelector(selectAllTokens);
   const allChains = getAllChains();
+  
+  const allAssets = React.useMemo(() => {
+    const assets = [];
+
+    // Add native chains
+    allChains.forEach((chain) => {
+      const bal = balances?.[activeAddress]?.[chain.chainId]?.native || '0';
+      const priceObj = globalPrices?.[chain.chainId]?.native;
+      const price = priceObj?.price || 0;
+      const fiatBal = parseFloat(bal) * price;
+      
+      assets.push({
+        type: 'native',
+        id: `native-${chain.chainId}`,
+        chain: chain,
+        balance: bal,
+        priceObj,
+        price,
+        fiatBal,
+      });
+    });
+
+    // Add tokens
+    if (tokens && tokens.length > 0) {
+      tokens.forEach((token) => {
+        const bal = balances?.[activeAddress]?.[token.chainId]?.tokens?.[token.address.toLowerCase()] || '0';
+        const priceObj = globalPrices?.[token.chainId]?.[token.address.toLowerCase()];
+        const price = priceObj?.price || 0;
+        const fiatBal = parseFloat(bal) * price;
+        const tokenChain = getChain(token.chainId);
+
+        assets.push({
+          type: 'token',
+          id: token.id,
+          token: token,
+          tokenChain,
+          balance: bal,
+          priceObj,
+          price,
+          fiatBal,
+        });
+      });
+    }
+
+    // Sort by fiat balance descending
+    return assets.sort((a, b) => {
+      // Primary sort: fiat value descending
+      if (b.fiatBal !== a.fiatBal) {
+        return b.fiatBal - a.fiatBal;
+      }
+      // Secondary sort: balance amount descending
+      if (parseFloat(b.balance) !== parseFloat(a.balance)) {
+        return parseFloat(b.balance) - parseFloat(a.balance);
+      }
+      // Tertiary sort: active chain first
+      if (a.type === 'native' && a.chain.chainId === activeChainId) return -1;
+      if (b.type === 'native' && b.chain.chainId === activeChainId) return 1;
+      
+      return 0;
+    });
+  }, [allChains, tokens, balances, activeAddress, globalPrices, activeChainId]);
+
   const nfts = useSelector((state) => selectNFTsByOwnerAndChain(state, activeAddress, activeChainId));
 
   useEffect(() => {
+    // Only fetch tokens and NFTs once per address change, not on every chain switch
     dispatch(loadTokens());
     dispatch(loadNFTs());
-    // Auto-discovery is now handled centrally by TokenDataManager for background polling,
-    // but we can keep an initial trigger here if needed.
+    
+    if (activeAddress && activeChainId) {
+      dispatch(autoDiscoverTokens({ address: activeAddress, chainId: activeChainId }));
+    }
   }, [dispatch, activeAddress, activeChainId]);
 
-  const activeAccount = accounts?.find(
-    (a) => a.address?.toLowerCase() === activeAddress?.toLowerCase()
+  const activeAccount = React.useMemo(() => 
+    accounts?.find((a) => a.address?.toLowerCase() === activeAddress?.toLowerCase()),
+    [accounts, activeAddress]
   );
 
   const nativeBalance = balances?.[activeAddress]?.[activeChainId]?.native || '0';
 
-  // Calculate total fiat balance using centralized pricing state
-  let fiatNative = 0;
-  allChains.forEach(chain => {
-    const bal = balances?.[activeAddress]?.[chain.chainId]?.native || '0';
-    const p = globalPrices?.[chain.chainId]?.native?.price || 0;
-    fiatNative += parseFloat(bal) * p;
-  });
-
-  let fiatTokens = 0;
-  if (tokens) {
-    tokens.forEach(t => {
-      const bal = balances?.[activeAddress]?.[t.chainId]?.tokens?.[t.address.toLowerCase()] || '0';
-      const p = globalPrices?.[t.chainId]?.[t.address.toLowerCase()]?.price || 0;
-      fiatTokens += parseFloat(bal) * p;
+  // Calculate total fiat balance using centralized pricing state (Memoized)
+  const { totalFiat, fiatNative } = React.useMemo(() => {
+    let _fiatNative = 0;
+    allChains.forEach(chain => {
+      const bal = balances?.[activeAddress]?.[chain.chainId]?.native || '0';
+      const p = globalPrices?.[chain.chainId]?.native?.price || 0;
+      _fiatNative += parseFloat(bal) * p;
     });
-  }
-  const totalFiat = fiatNative + fiatTokens;
+
+    let _fiatTokens = 0;
+    if (tokens) {
+      tokens.forEach(t => {
+        const bal = balances?.[activeAddress]?.[t.chainId]?.tokens?.[t.address.toLowerCase()] || '0';
+        const p = globalPrices?.[t.chainId]?.[t.address.toLowerCase()]?.price || 0;
+        _fiatTokens += parseFloat(bal) * p;
+      });
+    }
+    return {
+      fiatNative: _fiatNative,
+      totalFiat: _fiatNative + _fiatTokens
+    };
+  }, [balances, globalPrices, tokens, activeAddress, allChains]);
 
   const truncateAddress = (addr) => {
     if (!addr) return '';
@@ -92,17 +163,17 @@ export default function Dashboard() {
     const num = parseFloat(bal);
     if (isNaN(num)) return '0';
     if (num === 0) return '0';
-    if (num < 0.0001) return '< 0.0001';
-    if (num < 1) return num.toFixed(6);
-    if (num < 1000) return num.toFixed(4);
+    if (num < 1) return num.toLocaleString(undefined, { maximumFractionDigits: 10 });
+    if (num < 1000) return num.toLocaleString(undefined, { maximumFractionDigits: 4 });
     return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
   };
 
   const formatPrice = (p) => {
     if (typeof p !== 'number' || isNaN(p) || p === 0) return '0.00';
-    if (p < 0.000001) return p.toFixed(8);
-    if (p < 0.0001) return p.toFixed(6);
-    if (p < 0.01) return p.toFixed(4);
+    if (p < 0.00000001) return p.toExponential(4); // e.g., 1.2345e-9
+    if (p < 0.000001) return p.toFixed(10);
+    if (p < 0.0001) return p.toFixed(8);
+    if (p < 0.01) return p.toFixed(6);
     return p.toFixed(2);
   };
 
@@ -237,70 +308,64 @@ export default function Dashboard() {
               </button>
             </div>
 
-        {allChains.filter(chain => chain.chainId === activeChainId).map((chain, index) => {
-          const bal = balances?.[activeAddress]?.[chain.chainId]?.native || '0';
-          const priceObj = globalPrices?.[chain.chainId]?.native;
-          const price = priceObj?.price || 0;
-          const fiatBal = parseFloat(bal) * price;
-          
-          return (
-            <motion.div
-              key={`native-${chain.chainId}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + (index * 0.05) }}
-              onClick={() => navigate('/token/native')}
-              className="glass-card-hover p-4 flex items-center gap-3 cursor-pointer mb-2"
-            >
-              <div className="relative">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-surface-800 overflow-hidden border border-surface-700"
-                  style={{ background: chain.icon ? 'transparent' : (chain.color || '#627EEA') }}
-                >
-                  {chain.icon ? (
-                    <img src={chain.icon} alt={chain.shortName} className="w-full h-full object-cover" />
-                  ) : (
-                    chain.nativeCurrency?.symbol?.charAt(0) || 'E'
-                  )}
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-white">
-                    {chain.nativeCurrency?.name || 'Ether'} <span className="text-xs text-surface-400 font-normal">({chain.name})</span>
-                  </h4>
-                  <span className="text-sm font-semibold text-white token-amount">
-                    {showBalance ? formatBalance(bal) : '••••'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between mt-0.5">
-                  <span className="text-xs text-surface-400">
-                    {price > 0 ? `$${formatPrice(price)}` : (priceObj ? 'Market data unavailable' : 'Loading...')}
-                  </span>
-                  <span className="text-xs text-surface-400 text-right">
-                    {showBalance ? `$${formatPrice(fiatBal)}` : '••••'}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-
-        {tokens.filter(t => t.chainId === activeChainId).length > 0 && (
-          tokens.filter(t => t.chainId === activeChainId).map((token, index) => {
-            const tokenBalance = balances?.[activeAddress]?.[token.chainId]?.tokens?.[token.address.toLowerCase()] || '0';
-            const priceObj = globalPrices?.[token.chainId]?.[token.address.toLowerCase()];
-            const price = priceObj?.price || 0;
-            const fiatBal = parseFloat(tokenBalance) * price;
-            const tokenChain = getChain(token.chainId);
-            
+        {allAssets.map((asset, index) => {
+          if (asset.type === 'native') {
+            const { chain, balance, priceObj, price, fiatBal } = asset;
             return (
               <motion.div
-                key={token.id}
+                key={asset.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + (allChains.length + index + 1) * 0.05 }}
-                className="mt-2 glass-card-hover p-4 flex items-center gap-3 cursor-pointer"
+                transition={{ delay: 0.1 + (index * 0.05) }}
+                onClick={async () => {
+                  if (chain.chainId !== activeChainId) {
+                    await networkManager.switchChain(chain.chainId);
+                  }
+                  navigate('/token/native');
+                }}
+                className={`glass-card-hover p-4 flex items-center gap-3 cursor-pointer mb-2 ${chain.chainId === activeChainId ? 'border-primary-500/30 bg-primary-500/5' : ''}`}
+              >
+                <div className="relative">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-surface-800 overflow-hidden border border-surface-700"
+                    style={{ background: chain.icon ? 'transparent' : (chain.color || '#627EEA') }}
+                  >
+                    {chain.icon ? (
+                      <img src={chain.icon} alt={chain.shortName} className="w-full h-full object-cover" />
+                    ) : (
+                      chain.nativeCurrency?.symbol?.charAt(0) || 'E'
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-white">
+                      {chain.nativeCurrency?.name || 'Ether'} <span className="text-xs text-surface-400 font-normal">({chain.name})</span>
+                    </h4>
+                    <span className="text-sm font-semibold text-white token-amount">
+                      {showBalance ? formatBalance(balance) : '••••'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-0.5">
+                    <span className="text-xs text-surface-400">
+                      {price > 0 ? `$${formatPrice(price)}` : (priceObj ? 'Market data unavailable' : 'Loading...')}
+                    </span>
+                    <span className="text-xs text-surface-400 text-right">
+                      {showBalance ? `$${formatPrice(fiatBal)}` : '••••'}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          } else {
+            const { token, tokenChain, balance, priceObj, price, fiatBal } = asset;
+            return (
+              <motion.div
+                key={asset.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + (index * 0.05) }}
+                className="mt-2 glass-card-hover p-4 flex items-center gap-3 cursor-pointer mb-2"
                 onClick={async () => {
                   if (token.chainId !== activeChainId) {
                     await networkManager.switchChain(token.chainId);
@@ -330,7 +395,7 @@ export default function Dashboard() {
                       {token.name} <span className="text-xs text-surface-400 font-normal">({tokenChain?.shortName})</span>
                     </h4>
                     <span className="text-sm font-semibold text-white token-amount">
-                      {showBalance ? formatBalance(tokenBalance) : '••••'}
+                      {showBalance ? formatBalance(balance) : '••••'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-0.5">
@@ -344,12 +409,13 @@ export default function Dashboard() {
                 </div>
               </motion.div>
             );
-          })
-        )}
-        {tokens.filter(t => t.chainId === activeChainId).length === 0 && (
+          }
+        })}
+
+        {allAssets.length === 0 && (
           <div className="mt-3 py-6 text-center">
             <p className="text-sm text-surface-500">
-              No custom tokens found on this network
+              No assets found
             </p>
           </div>
         )}

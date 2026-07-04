@@ -113,7 +113,7 @@ async function handleProviderRequest(payload, sender) {
   const origin = sender?.origin;
 
   if (!origin) {
-    return { error: 'Origin is required for RPC requests' };
+    return { error: { code: 4001, message: 'Origin is required for RPC requests' } };
   }
 
   switch (method) {
@@ -136,7 +136,12 @@ async function handleProviderRequest(payload, sender) {
     case 'wallet_switchEthereumChain':
     case 'wallet_addEthereumChain':
       if (!(await permissionManager.hasPermission(origin))) {
-        return { error: '4100: Unauthorized - DApp is not connected to this origin.' };
+        return { 
+          error: { 
+            code: 4100, 
+            message: 'Unauthorized - DApp is not connected to this origin.' 
+          } 
+        };
       }
       return launchApprovalPopup(method, params, sender);
 
@@ -152,6 +157,29 @@ async function handleProviderRequest(payload, sender) {
     case 'net_version':
       const chainId = providerManager.getActiveChainId();
       return { result: method === 'net_version' ? parseInt(chainId, 16).toString() : chainId };
+
+    case 'wallet_getCapabilities':
+    case 'wallet_sendCalls':
+    case 'wallet_showCallsStatus':
+      // EIP-5792: Return standard JSON-RPC -32601 (Method Not Found) 
+      // Viem handles -32601 perfectly without throwing UnknownRpcError warnings
+      return {
+        error: {
+          code: -32601,
+          message: 'Unsupported method: ' + method
+        }
+      };
+
+    case 'wallet_watchAsset':
+    case 'wallet_revokePermissions':
+    case 'wallet_getPermissions':
+      // EIP-1193 standard 4200 Unsupported Method for legacy/misc methods
+      return {
+        error: {
+          code: 4200,
+          message: 'Unsupported method: ' + method
+        }
+      };
 
     // 4. Fallback to RPC Routing
     default:
@@ -169,7 +197,12 @@ async function routeRpcRequest(method, params) {
     return { result };
   } catch (error) {
     console.error(`[NexVault] RPC Error for ${method}:`, error);
-    return { error: error.message || 'RPC Request Failed' };
+    return { 
+      error: {
+        code: error.code || -32603,
+        message: error.message || 'Internal RPC Error'
+      }
+    };
   }
 }
 

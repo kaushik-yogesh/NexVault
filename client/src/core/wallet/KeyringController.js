@@ -172,6 +172,43 @@ class KeyringController {
   }
 
   /**
+   * Import a single account from a seed phrase (does not replace vault mnemonic)
+   * 
+   * @param {string} password - Vault password
+   * @param {string} mnemonic - BIP-39 seed phrase
+   * @param {number} accountIndex - Which account index to derive
+   * @param {string} [name] - Account name
+   * @returns {Promise<Object>} Imported account (public data)
+   */
+  async importFromSeedPhraseAccount(password, mnemonic, accountIndex = 0, name) {
+    const importedAccount = walletManager.importFromMnemonicAccount(mnemonic, accountIndex, name);
+
+    if (vaultManager.state === VAULT_STATE.UNINITIALIZED) {
+      const keyring = {
+        type: 'imported',
+        mnemonic: null,
+        hdPath: null,
+        nextIndex: 0,
+        accounts: [importedAccount],
+      };
+      await vaultManager.createVault(password, keyring);
+      this._keyring = keyring;
+    } else {
+      if (!this.isUnlocked) {
+        await this.unlock(password);
+      }
+      this._keyring = walletManager.addImportedAccount(this._keyring, importedAccount);
+      await vaultManager.updateVault(this._keyring);
+    }
+
+    this._activeAddress = importedAccount.address;
+    this._notifyListeners();
+
+    const { privateKey: _, ...publicData } = importedAccount;
+    return publicData;
+  }
+
+  /**
    * Import from JSON keystore file
    * 
    * @param {string} password - Vault password
@@ -213,7 +250,7 @@ class KeyringController {
   }
 
   /**
-   * Unlock the wallet
+   * Unlock the wallet with password
    * @param {string} password - Vault password
    * @returns {Promise<Object[]>} Public accounts
    */
@@ -222,6 +259,27 @@ class KeyringController {
     this._keyring = keyring;
 
     // Restore active address or default to first account
+    if (
+      !this._activeAddress ||
+      !keyring.accounts.find(
+        (a) => a.address.toLowerCase() === this._activeAddress.toLowerCase()
+      )
+    ) {
+      this._activeAddress = keyring.accounts[0]?.address || null;
+    }
+
+    this._notifyListeners();
+    return walletManager.getPublicAccounts(keyring);
+  }
+
+  /**
+   * Unlock the wallet with biometric passkey
+   * @returns {Promise<Object[]>} Public accounts
+   */
+  async unlockWithBiometric() {
+    const keyring = await vaultManager.unlockWithBiometric();
+    this._keyring = keyring;
+
     if (
       !this._activeAddress ||
       !keyring.accounts.find(
@@ -364,6 +422,22 @@ class KeyringController {
     return await walletManager.exportToKeystore(this._keyring, address, password);
   }
 
+  /**
+   * Export mnemonic by verifying password
+   * @param {string} password - Vault password
+   * @returns {Promise<string>} Mnemonic phrase
+   */
+  async exportMnemonic(password) {
+    this._ensureUnlocked();
+    await vaultManager.verifyPassword(password);
+    
+    if (this._keyring.type !== 'hd' || !this._keyring.mnemonic) {
+      throw new Error('This is an imported wallet without a mnemonic phrase.');
+    }
+    
+    return this._keyring.mnemonic;
+  }
+
   // ---- Security ----
 
   /**
@@ -374,6 +448,28 @@ class KeyringController {
    */
   async changePassword(currentPassword, newPassword) {
     await vaultManager.changePassword(currentPassword, newPassword);
+  }
+
+  /**
+   * Enable Biometric Unlock
+   * @param {string} password - Current password required to derive master key
+   */
+  async enableBiometric(password) {
+    await vaultManager.enableBiometric(password);
+  }
+
+  /**
+   * Disable Biometric Unlock
+   */
+  async disableBiometric() {
+    await vaultManager.disableBiometric();
+  }
+
+  /**
+   * Check if biometric is enabled
+   */
+  async hasBiometric() {
+    return vaultManager.hasBiometric();
   }
 
   /**

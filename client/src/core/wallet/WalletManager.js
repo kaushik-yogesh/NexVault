@@ -187,6 +187,37 @@ class WalletManager {
   }
 
   /**
+   * Import an account from a mnemonic phrase (without replacing the entire HD wallet)
+   * Derives a specific account index (default 0) and imports it as a standalone account.
+   * 
+   * @param {string} mnemonic - BIP-39 mnemonic phrase
+   * @param {number} [accountIndex=0] - Which account to derive
+   * @param {string} [name='Imported Seed Account'] - Account name
+   * @returns {Object} Account data for the imported key
+   */
+  importFromMnemonicAccount(mnemonic, accountIndex = 0, name = 'Imported Seed Account') {
+    const normalized = mnemonic.trim().toLowerCase().replace(/\s+/g, ' ');
+
+    if (!this.validateMnemonic(normalized)) {
+      throw new Error('WALLET_INVALID_MNEMONIC: Invalid seed phrase.');
+    }
+
+    const hdNode = ethers.HDNodeWallet.fromPhrase(normalized, undefined, ETH_DERIVATION_PATH);
+    const derived = hdNode.deriveChild(accountIndex);
+
+    return {
+      index: -1, // Not HD-derived relative to current vault
+      name,
+      address: derived.address,
+      privateKey: derived.privateKey,
+      derivationPath: null,
+      type: 'imported_seed',
+      avatar: this._generateAvatar(derived.address),
+      createdAt: Date.now(),
+    };
+  }
+
+  /**
    * Export an account as an encrypted JSON keystore
    * 
    * @param {Object} keyring - Existing keyring data

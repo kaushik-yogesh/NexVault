@@ -132,7 +132,15 @@ export default function SendForm() {
 
     if (!amount) errs.amount = 'Amount is required';
     else if (isNaN(Number(amount)) || Number(amount) <= 0) errs.amount = 'Invalid amount';
-    else if (Number(amount) > Number(currentBalance)) errs.amount = 'Insufficient balance';
+    else {
+      let totalCost = Number(amount);
+      if (isNative && estimatedCost?.gasCostFormatted) {
+        totalCost += Number(estimatedCost.gasCostFormatted);
+      }
+      if (totalCost > Number(currentBalance)) {
+        errs.amount = isNative ? 'Insufficient balance (amount + gas)' : 'Insufficient balance';
+      }
+    }
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -153,6 +161,11 @@ export default function SendForm() {
         to: recipient,
         value: ethers.parseUnits(amount, decimals),
         chainId: activeChain?.chainIdDecimal,
+        metadata: {
+          type: 'SEND',
+          assetType: 'NATIVE',
+          value: amount
+        }
       };
 
       if (!isNative && selectedTokenAddress) {
@@ -167,6 +180,12 @@ export default function SendForm() {
           value: 0n,
           data: data,
           chainId: activeChain?.chainIdDecimal,
+          metadata: {
+            type: 'SEND',
+            assetType: 'ERC20',
+            tokenAddress: selectedTokenAddress,
+            value: amount
+          }
         };
       }
 
@@ -200,9 +219,14 @@ export default function SendForm() {
   };
 
   const handleMax = () => {
-    // Leave some for gas if sending native currency
     if (isNative) {
-      const max = Math.max(0, Number(currentBalance) - 0.005);
+      let buffer = 0.005;
+      if (estimatedCost?.gasCostFormatted) {
+        buffer = Number(estimatedCost.gasCostFormatted) * 1.2; // 20% extra safety margin for fluctuating gas
+      } else if (activeChainId === '0x89') { // Polygon typically needs higher buffer due to priority fees
+        buffer = 0.015;
+      }
+      const max = Math.max(0, Number(currentBalance) - buffer);
       setAmount(max > 0 ? max.toString() : '0');
     } else {
       setAmount(currentBalance.toString());

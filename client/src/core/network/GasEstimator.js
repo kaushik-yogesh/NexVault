@@ -32,7 +32,7 @@ class GasEstimator {
     const feeData = await provider.getFeeData();
 
     if (chain?.supportsEIP1559 && feeData.maxFeePerGas) {
-      return this._getEIP1559Estimates(feeData);
+      return this._getEIP1559Estimates(feeData, chainId);
     }
 
     return this._getLegacyEstimates(feeData);
@@ -84,17 +84,60 @@ class GasEstimator {
   }
 
   /**
+   * Fast baseline gas estimation for dynamic MAX calculations
+   * 
+   * @param {string} chainId - Chain ID
+   * @param {bigint} fallbackGasLimit - Expected gas limit for the operation
+   * @returns {Promise<Object>} { gasCostWei, gasCostFormatted }
+   */
+  async estimateBaseGas(chainId, fallbackGasLimit = 500000n) {
+    try {
+      const estimates = await this.getGasEstimates(chainId);
+      // Use medium speed as baseline for reservations
+      const selectedEstimate = estimates.medium;
+
+      let totalCostWei;
+      if (selectedEstimate.maxFeePerGas) {
+        totalCostWei = fallbackGasLimit * ethers.parseUnits(selectedEstimate.maxFeePerGas, 'gwei');
+      } else {
+        totalCostWei = fallbackGasLimit * ethers.parseUnits(selectedEstimate.gasPrice, 'gwei');
+      }
+
+      return {
+        gasCostWei: totalCostWei.toString(),
+        gasCostFormatted: ethers.formatEther(totalCostWei),
+      };
+    } catch (error) {
+      console.warn('Base gas estimation failed, using safe default', error);
+      // Absolute fallback if network is completely unreachable
+      return {
+        gasCostWei: ethers.parseEther('0.005').toString(), // 0.005 safe default
+        gasCostFormatted: '0.005'
+      };
+    }
+  }
+
+  /**
    * EIP-1559 gas estimates
    * @private
    */
-  _getEIP1559Estimates(feeData) {
+  _getEIP1559Estimates(feeData, chainId) {
     const baseFee = feeData.maxFeePerGas - (feeData.maxPriorityFeePerGas || 0n);
-    const priorityFee = feeData.maxPriorityFeePerGas || ethers.parseUnits('1.5', 'gwei');
+    let priorityFee = feeData.maxPriorityFeePerGas || ethers.parseUnits('1.5', 'gwei');
 
     const estimates = {};
 
     for (const [speed, preset] of Object.entries(GAS_PRESETS)) {
-      const adjustedPriority = (priorityFee * BigInt(Math.round(preset.priorityMultiplier * 100))) / 100n;
+      let adjustedPriority = (priorityFee * BigInt(Math.round(preset.priorityMultiplier * 100))) / 100n;
+      
+      // Enforce Polygon minimum of 30 gwei on the final adjusted priority fee
+      if (chainId === '137' || chainId === '0x89') {
+        const minPolygonPriority = ethers.parseUnits('30', 'gwei');
+        if (adjustedPriority < minPolygonPriority) {
+          adjustedPriority = minPolygonPriority;
+        }
+      }
+
       const maxFee = (baseFee * BigInt(Math.round(preset.maxFeeMultiplier * 100))) / 100n + adjustedPriority;
 
       estimates[speed] = {

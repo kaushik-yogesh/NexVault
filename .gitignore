@@ -43,7 +43,7 @@ client/dist/
 *.pem
 
 # MongoDB
-data/
+/data/
 
 # Redis
 dump.rdb

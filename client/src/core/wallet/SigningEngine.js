@@ -28,7 +28,7 @@ class SigningEngine {
     // Build the full transaction
     const tx = {
       to: txRequest.to,
-      value: txRequest.value ? ethers.parseEther(txRequest.value.toString()) : 0n,
+      value: txRequest.value ? BigInt(txRequest.value) : 0n,
       data: txRequest.data || '0x',
       chainId: txRequest.chainId,
     };
@@ -77,7 +77,7 @@ class SigningEngine {
   async signTransaction(signer, txRequest) {
     const tx = {
       to: txRequest.to,
-      value: txRequest.value ? ethers.parseEther(txRequest.value.toString()) : 0n,
+      value: txRequest.value ? BigInt(txRequest.value) : 0n,
       data: txRequest.data || '0x',
       chainId: txRequest.chainId,
       nonce: txRequest.nonce,

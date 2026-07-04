@@ -7,7 +7,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import AppRouter from './router/AppRouter.jsx';
-import { bootWallet } from './features/wallet/walletSlice.js';
+import { bootWallet, setupWalletListeners } from './features/wallet/walletSlice.js';
+import { fetchAppConfig } from './features/config/configSlice.js';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -40,9 +41,12 @@ class ErrorBoundary extends React.Component {
 export default function App() {
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.settings.theme);
+  const isConfigLoaded = useSelector((state) => state.config.isLoaded);
 
-  // Boot wallet on mount
+  // Boot wallet & config on mount
   useEffect(() => {
+    dispatch(fetchAppConfig());
+    dispatch(setupWalletListeners());
     dispatch(bootWallet());
   }, [dispatch]);
 

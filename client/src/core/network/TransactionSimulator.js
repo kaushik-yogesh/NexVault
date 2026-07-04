@@ -93,11 +93,22 @@ class TransactionSimulator {
     const provider = providerManager.getProvider(chainId);
 
     try {
+      // Clean up tx object for simulation (ethers v6 validation is strict)
+      // Remove chainId to avoid BigInt vs Number type issues, it's not needed for eth_call
+      const simTx = { ...tx };
+      delete simTx.chainId;
+      // Strip gas fields because they might be in string format (e.g., "30.5" gwei) from the UI,
+      // which causes ethers v6 validation errors. eth_call/estimateGas do not need them.
+      delete simTx.maxFeePerGas;
+      delete simTx.maxPriorityFeePerGas;
+      delete simTx.gasPrice;
+      delete simTx.gasLimit;
+
       // 1. Check if the call succeeds without state changes
-      await provider.call(tx);
+      await provider.call(simTx);
       
       // 2. Estimate the exact gas needed
-      const gasEstimate = await provider.estimateGas(tx);
+      const gasEstimate = await provider.estimateGas(simTx);
 
       return {
         success: true,
@@ -110,10 +121,18 @@ class TransactionSimulator {
       // Attempt to extract the revert reason
       if (error.reason) {
         reason = error.reason;
+      } else if (error.shortMessage) {
+        reason = error.shortMessage;
       } else if (error.info?.error?.message) {
         reason = error.info.error.message;
       } else if (error.data) {
         reason = `Reverted with data: ${error.data}`;
+      } else if (error.message) {
+        reason = error.message;
+      }
+
+      if (reason.toLowerCase().includes('return amount is not enough') || reason.toLowerCase().includes('insufficient_output_amount')) {
+        reason = 'Return amount is not enough. This token likely has a transfer tax or high price volatility. Please increase your Slippage Tolerance in Swap Settings.';
       }
 
       return {

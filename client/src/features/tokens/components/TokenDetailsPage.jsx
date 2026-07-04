@@ -91,7 +91,7 @@ export default function TokenDetailsPage() {
     };
     
     loadData();
-  }, [isNative, token, activeChainId, timeframe, activeAddress]);
+  }, [isNative, token?.address, activeChainId, timeframe, activeAddress]);
 
   if (!token) {
     return (
@@ -126,6 +126,15 @@ export default function TokenDetailsPage() {
     if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
     if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
     return `$${value.toLocaleString()}`;
+  };
+
+  const formatBalance = (bal) => {
+    const num = parseFloat(bal);
+    if (isNaN(num)) return '0';
+    if (num === 0) return '0';
+    if (num < 1) return num.toLocaleString(undefined, { maximumFractionDigits: 10 });
+    if (num < 1000) return num.toLocaleString(undefined, { maximumFractionDigits: 4 });
+    return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
   };
 
   // History is now dynamically loaded
@@ -181,7 +190,7 @@ export default function TokenDetailsPage() {
              <h2 className="text-lg text-surface-200 font-bold tracking-tight">{token.name} <span className="text-surface-500 font-medium ml-1">{token.symbol}</span></h2>
           </div>
           <h1 className="text-[2.75rem] font-black text-white mb-3 tracking-tight leading-none">
-            ${price > 0 ? price.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 }) : '0.00'}
+            ${price > 0 ? (price < 0.0001 ? price.toExponential(4) : price.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: price < 0.01 ? 6 : 4 })) : '0.00'}
           </h1>
           <div className="flex items-center gap-3 text-sm font-bold">
             <div className={`flex items-center gap-1 px-2.5 py-1 rounded-lg ${isPositive ? 'bg-success-500/10 text-success-400' : 'bg-danger-500/10 text-danger-400'}`}>
@@ -286,7 +295,7 @@ export default function TokenDetailsPage() {
                     </span>
                   )}
                   <span className="text-sm text-surface-400">
-                    {parseFloat(tokenBalance).toLocaleString(undefined, { maximumFractionDigits: 4 })} {token.symbol}
+                    {formatBalance(tokenBalance)} {token.symbol}
                   </span>
                 </div>
               </div>

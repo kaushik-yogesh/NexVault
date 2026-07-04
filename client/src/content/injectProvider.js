@@ -15,6 +15,16 @@
   const pendingRequests = new Map();
   const eventListeners = {};
 
+  class ProviderRpcError extends Error {
+    constructor(code, message, data) {
+      super(message);
+      this.code = code;
+      if (data !== undefined) {
+        this.data = data;
+      }
+    }
+  }
+
   const provider = {
     isMetaMask: true, // Compatibility — many DApps check this specifically
     isNexVault: true,
@@ -120,7 +130,12 @@
       pendingRequests.delete(event.data.id);
 
       if (event.data.error) {
-        reject(new Error(event.data.error));
+        const errObj = event.data.error;
+        if (typeof errObj === 'object' && errObj !== null) {
+          reject(new ProviderRpcError(errObj.code || -32603, errObj.message || 'RPC Error', errObj.data));
+        } else {
+          reject(new ProviderRpcError(-32603, String(errObj)));
+        }
       } else {
         resolve(event.data.result);
       }

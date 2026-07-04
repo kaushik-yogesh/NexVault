@@ -68,9 +68,9 @@ export const CHAINS = {
     shortName: 'MATIC',
     nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
     rpcUrls: {
-      primary: ALCHEMY_KEY ? `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}` : 'https://polygon.drpc.org',
-      secondary: 'https://1rpc.io/matic',
-      fallback: 'https://polygon-rpc.com',
+      primary: ALCHEMY_KEY ? `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}` : 'https://polygon-bor-rpc.publicnode.com',
+      secondary: 'https://polygon-public.nodies.app',
+      fallback: 'https://polygon.api.onfinality.io/public',
     },
     blockExplorer: {
       name: 'Polygonscan',
@@ -157,7 +157,14 @@ export const CHAINS = {
 
 /** Get chain config by chainId (hex or decimal) */
 export function getChain(chainId) {
-  const hexId = typeof chainId === 'number' ? `0x${chainId.toString(16)}` : chainId;
+  let hexId = chainId;
+  if (typeof chainId === 'number') {
+    hexId = `0x${chainId.toString(16)}`;
+  } else if (typeof chainId === 'string' && !chainId.startsWith('0x') && !isNaN(Number(chainId))) {
+    hexId = `0x${Number(chainId).toString(16)}`;
+  } else if (typeof chainId === 'string') {
+    hexId = chainId.toLowerCase();
+  }
   return CHAINS[hexId] || null;
 }
 

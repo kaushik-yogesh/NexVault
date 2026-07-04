@@ -13,6 +13,7 @@ import nftsReducer from '../features/nfts/nftsSlice.js';
 import stakingReducer from '../features/portfolio/stakingSlice.js';
 import approvalsReducer from '../features/approvals/approvalsSlice.js';
 import pricingReducer from '../features/portfolio/pricingSlice.js';
+import configReducer from '../features/config/configSlice.js';
 
 const rootReducer = combineReducers({
   wallet: walletReducer,
@@ -25,6 +26,7 @@ const rootReducer = combineReducers({
   staking: stakingReducer,
   approvals: approvalsReducer,
   pricing: pricingReducer,
+  config: configReducer,
 });
 
 export default rootReducer;

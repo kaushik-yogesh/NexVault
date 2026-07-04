@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Transaction from '../models/Transaction.js';
 import AppConfig from '../models/AppConfig.js';
 import Admin from '../models/Admin.js';
+import configService from '../services/configService.js';
 
 /**
  * Get dashboard analytics
@@ -168,7 +169,8 @@ export const updateConfig = asyncHandler(async (req, res) => {
       { key: update.key },
       { 
         value: update.value, 
-        type: update.type,
+        type: update.type || 'GENERAL',
+        category: update.category || 'GENERAL',
         description: update.description,
         updatedBy: req.admin._id 
       },
@@ -177,9 +179,70 @@ export const updateConfig = asyncHandler(async (req, res) => {
     results.push(conf);
   }
 
+  // Invalidate in-memory cache so next request fetches fresh data
+  configService.invalidateCache();
+
   res.json({
     success: true,
     message: 'Configuration updated successfully',
     data: results
+  });
+});
+
+/**
+ * Get all platform transactions
+ * GET /api/admin/transactions
+ */
+export const getTransactions = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 50;
+  const skip = (page - 1) * limit;
+
+  const filter = {};
+  if (req.query.search) {
+    filter.$or = [
+      { txHash: { $regex: req.query.search, $options: 'i' } },
+      { from: { $regex: req.query.search, $options: 'i' } },
+      { to: { $regex: req.query.search, $options: 'i' } }
+    ];
+  }
+  
+  if (req.query.type) filter.type = req.query.type;
+  if (req.query.status) filter.status = req.query.status;
+  if (req.query.chainId) filter.chainId = req.query.chainId;
+
+  const transactions = await Transaction.find(filter)
+    .populate('userId', 'address')
+    .sort({ timestamp: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Transaction.countDocuments(filter);
+
+  // Calculate totals for summary cards (gas, volume)
+  const totalsAgg = await Transaction.aggregate([
+    { $match: filter },
+    { $group: { 
+        _id: null, 
+        totalVolumeUSD: { $sum: "$usdValue" },
+        // Summing platform fees would typically require converting string wei to a normalized number/BigInt, 
+        // but for simplicity in analytics we might rely on usdValue for now.
+    }}
+  ]);
+
+  res.json({
+    success: true,
+    data: {
+      transactions,
+      summary: {
+        totalTransactions: total,
+        totalVolumeUSD: totalsAgg.length > 0 ? totalsAgg[0].totalVolumeUSD : 0
+      },
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    }
   });
 });

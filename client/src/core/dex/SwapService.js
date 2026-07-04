@@ -19,9 +19,12 @@ class SwapService {
    * @param {string} takerAddress User's wallet address
    * @returns {Promise<Object>} Quote details formatted for the UI
    */
-  async getQuote(chainId, sellToken, buyToken, sellAmount, slippage, sellPrice = 0, buyPrice = 0, takerAddress = '', sellTokenDecimals = 18, buyTokenDecimals = 18) {
+  async getQuote(chainId, sellToken, buyToken, sellAmount, slippage, sellPrice = 0, buyPrice = 0, takerAddress, sellTokenDecimals = 18, buyTokenDecimals = 18) {
     if (!sellAmount || parseFloat(sellAmount) <= 0) {
       throw new Error("Invalid sell amount");
+    }
+    if (!takerAddress) {
+      throw new Error("Missing takerAddress: Cannot build transaction without a wallet address");
     }
 
     const decimalChainId = BigInt(chainId).toString();
@@ -43,7 +46,7 @@ class SwapService {
 
     const quote = buildData.quote;
     const buyAmountFormatted = ethers.formatUnits(quote.buyAmount, buyTokenDecimals);
-    const minReceived = ethers.formatUnits(quote.guaranteedPrice ? (BigInt(sellAmountWei) * BigInt(Math.floor(parseFloat(quote.guaranteedPrice) * 1e18)) / BigInt(1e18)).toString() : quote.buyAmount, buyTokenDecimals);
+    const minReceived = ethers.formatUnits(quote.guaranteedPrice || quote.buyAmount, buyTokenDecimals);
 
     // USD estimation
     const sellValueUsd = parseFloat(sellAmount) * sellPrice;
@@ -71,16 +74,17 @@ class SwapService {
       minReceived: parseFloat(minReceived).toFixed(6),
       exchangeRate: (parseFloat(buyAmountFormatted) / parseFloat(sellAmount)).toFixed(6),
       priceImpact,
-      platformFeePercentage: parseFloat(quote.buyTokenPercentageFee || '0') * 100,
+      platformFeePercentage: parseFloat(quote.buyTokenPercentageFee || '0'),
       platformFeeAmount: quote.feeRecipient ? 'Included in price' : '0',
       estimatedGas,
       gasPriceWei,
       networkFeeUsd: gasUsd.toFixed(2),
       route: [
-        { name: '0x Aggregator', part: 100 }
+        { name: 'KyberSwap Aggregator', part: 100 }
       ],
       _internalRoute: {
-        txPayload: buildData.transaction
+        txPayload: buildData.transaction,
+        routerAddress: quote.routerAddress
       }
     };
   }

@@ -18,6 +18,7 @@ import {
   HiOutlineChevronRight,
   HiOutlineClock,
   HiOutlineUserGroup,
+  HiOutlineFingerPrint,
 } from 'react-icons/hi2';
 import {
   setTheme,
@@ -25,17 +26,33 @@ import {
   toggleShowBalances,
   toggleShowScamWarnings,
 } from '../settingsSlice.js';
-import { lockWallet, resetWallet } from '../../wallet/walletSlice.js';
+import { performLockWallet, resetWallet, enableBiometric, disableBiometric } from '../../wallet/walletSlice.js';
 import { switchNetwork, selectActiveChain } from '../../network/networkSlice.js';
 
 import ExportKeystoreModal from './ExportKeystoreModal.jsx';
+import RevealSeedModal from './RevealSeedModal.jsx';
 
 export default function SettingsPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showNetworkMenu, setShowNetworkMenu] = useState(false);
   const [showKeystoreModal, setShowKeystoreModal] = useState(false);
+  const [showRevealSeedModal, setShowRevealSeedModal] = useState(false);
   const settings = useSelector((state) => state.settings);
+  const { hasBiometricEnabled } = useSelector((state) => state.wallet);
+
+  const handleBiometricToggle = async () => {
+    if (hasBiometricEnabled) {
+      dispatch(disableBiometric());
+    } else {
+      const pwd = window.prompt("Enter your vault password to enable biometrics:");
+      if (pwd) {
+        dispatch(enableBiometric({ password: pwd })).unwrap().catch(err => {
+          alert('Failed to enable biometrics: ' + err);
+        });
+      }
+    }
+  };
 
   const SettingRow = ({ icon: Icon, label, description, children, onClick, danger }) => (
     <button
@@ -141,6 +158,21 @@ export default function SettingsPage() {
             </SettingRow>
 
             <SettingRow
+              icon={HiOutlineFingerPrint}
+              label="Biometric Login"
+              description="Unlock wallet with FaceID / TouchID"
+              onClick={handleBiometricToggle}
+            >
+              <div className={`w-9 h-5 rounded-full transition-colors ${
+                hasBiometricEnabled ? 'bg-primary-500' : 'bg-surface-600'
+              } relative`}>
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
+                  hasBiometricEnabled ? 'left-4.5' : 'left-0.5'
+                }`} />
+              </div>
+            </SettingRow>
+
+            <SettingRow
               icon={HiOutlineShieldCheck}
               label="Token Approvals (Revoke)"
               description="Manage and revoke smart contract allowances"
@@ -151,7 +183,7 @@ export default function SettingsPage() {
               icon={HiOutlineLockClosed}
               label="Lock Wallet"
               description="Lock wallet now"
-              onClick={() => dispatch(lockWallet())}
+              onClick={() => dispatch(performLockWallet())}
             />
           </div>
         </div>
@@ -164,7 +196,7 @@ export default function SettingsPage() {
               icon={HiOutlineDocumentDuplicate}
               label="Show Recovery Phrase"
               description="View your wallet backup phrase"
-              onClick={() => navigate('/create/seed')}
+              onClick={() => setShowRevealSeedModal(true)}
             />
 
             <SettingRow
@@ -226,6 +258,11 @@ export default function SettingsPage() {
       <ExportKeystoreModal
         isOpen={showKeystoreModal}
         onClose={() => setShowKeystoreModal(false)}
+      />
+
+      <RevealSeedModal
+        isOpen={showRevealSeedModal}
+        onClose={() => setShowRevealSeedModal(false)}
       />
     </div>
   );

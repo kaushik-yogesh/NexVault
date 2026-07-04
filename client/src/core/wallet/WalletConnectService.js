@@ -42,6 +42,7 @@ class WalletConnectService {
     this.core = null;
     this.web3wallet = null;
     this.isInitialized = false;
+    this._initPromise = null;
     
     // Callbacks for UI integration
     this.onSessionProposal = null;
@@ -54,29 +55,36 @@ class WalletConnectService {
    */
   async init() {
     if (this.isInitialized) return;
+    if (this._initPromise) return this._initPromise;
 
-    try {
-      this.core = new Core({
-        projectId: 'b0a03d09a7e8bbf5e0a6e0f80bc64dc4', // Example public projectId
-        storage: extensionStorageAdapter,
-      });
+    this._initPromise = (async () => {
+      try {
+        this.core = new Core({
+          projectId: 'b0a03d09a7e8bbf5e0a6e0f80bc64dc4', // Example public projectId
+          storage: extensionStorageAdapter,
+        });
 
-      this.web3wallet = await Web3Wallet.init({
-        core: this.core,
-        metadata: {
-          name: 'NexVault',
-          description: 'Non-custodial, multi-chain crypto wallet',
-          url: window.location.origin,
-          icons: [`${window.location.origin}/nexvault-logo.png`],
-        },
-      });
+        this.web3wallet = await Web3Wallet.init({
+          core: this.core,
+          metadata: {
+            name: 'NexVault',
+            description: 'Non-custodial, multi-chain crypto wallet',
+            url: window.location.origin,
+            icons: [`${window.location.origin}/nexvault-logo.png`],
+          },
+        });
 
-      this._setupEventListeners();
-      this.isInitialized = true;
-      console.log('WalletConnect Initialized');
-    } catch (err) {
-      console.error('Failed to initialize WalletConnect', err);
-    }
+        this._setupEventListeners();
+        this.isInitialized = true;
+        console.log('WalletConnect Initialized');
+      } catch (err) {
+        console.error('Failed to initialize WalletConnect', err);
+        this._initPromise = null; // Reset on failure so we can retry
+        throw err;
+      }
+    })();
+    
+    return this._initPromise;
   }
 
   _setupEventListeners() {

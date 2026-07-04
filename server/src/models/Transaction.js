@@ -49,6 +49,23 @@ const transactionSchema = new mongoose.Schema(
       enum: ['PENDING', 'SUCCESS', 'FAILED'],
       default: 'PENDING',
     },
+    type: {
+      type: String,
+      enum: ['SEND', 'RECEIVE', 'SWAP', 'CONTRACT_INTERACTION', 'UNKNOWN'],
+      default: 'SEND',
+    },
+    networkFee: {
+      type: String, // Gas fee paid to the network (in wei/smallest unit)
+      default: '0',
+    },
+    platformFee: {
+      type: String, // Fee collected by the wallet treasury
+      default: '0',
+    },
+    usdValue: {
+      type: Number, // Optional tracking of USD volume for analytics
+      default: 0,
+    },
     timestamp: {
       type: Date,
       default: Date.now,

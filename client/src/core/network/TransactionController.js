@@ -34,6 +34,9 @@ class TransactionController {
     const chainId = txRequest.chainId || providerManager.getActiveChainId();
     const provider = providerManager.getProvider(chainId);
     const address = await signer.getAddress();
+    
+    // Ensure 'from' is set for accurate simulation and signing
+    txRequest.from = address;
 
     // 1. Simulate if requested
     if (simulateFirst) {
@@ -60,7 +63,7 @@ class TransactionController {
     // 4. Update Nonce Cache
     this._updateNonceCache(address, chainId, txRequest.nonce);
 
-    // 5. Track Transaction
+    // 5. Track Transaction Locally
     transactionTracker.track(txResponse.hash, chainId, {
       from: address,
       to: txRequest.to,
@@ -68,7 +71,41 @@ class TransactionController {
       nonce: txRequest.nonce
     });
 
+    // 6. Save to Backend DB
+    const metadata = txRequest.metadata || {};
+    this._saveToBackend({
+      txHash: txResponse.hash,
+      chainId: chainId.toString(),
+      from: address,
+      to: txRequest.to,
+      value: metadata.value || ethers.formatEther(txRequest.value || 0n), 
+      assetType: metadata.assetType || 'NATIVE',
+      type: metadata.type || 'SEND',
+      networkFee: (
+        BigInt(txRequest.gasLimit || 21000) * 
+        (txRequest.maxFeePerGas 
+          ? ethers.parseUnits(txRequest.maxFeePerGas.toString(), 'gwei') 
+          : (txRequest.gasPrice ? ethers.parseUnits(txRequest.gasPrice.toString(), 'gwei') : 0n))
+      ).toString(),
+      platformFee: metadata.platformFee || '0',
+      usdValue: metadata.usdValue || 0
+    }).catch(err => console.error("Failed to save transaction to backend:", err));
+
     return txResponse;
+  }
+
+  async _saveToBackend(txData) {
+    try {
+      // Import standard API client used in the app, or use fetch if env is set
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      await fetch(`${apiUrl}/transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(txData)
+      });
+    } catch (e) {
+      console.warn("Backend save skipped", e);
+    }
   }
 
   /**
@@ -117,11 +154,11 @@ class TransactionController {
   async _getNextNonce(address, chainId, provider) {
     const cacheKey = `${chainId}-${address.toLowerCase()}`;
     
-    // Get network nonce (confirmed + pending in mempool)
-    const networkNonce = await provider.getTransactionCount(address, 'pending');
+    // Get confirmed nonce ('latest' avoids getting stuck behind dropped/underpriced mempool transactions)
+    const networkNonce = await provider.getTransactionCount(address, 'latest');
     
-    // Get our cached nonce (transactions we've broadcasted but might not be in mempool yet)
-    const cachedNonce = this._nonceCache.get(cacheKey) || 0;
+    // Get our cached nonce (transactions we've broadcasted but might not be confirmed yet)
+    const cachedNonce = this._nonceCache.get(cacheKey) ?? -1;
 
     // Use whichever is higher
     const nextNonce = Math.max(networkNonce, cachedNonce + 1);

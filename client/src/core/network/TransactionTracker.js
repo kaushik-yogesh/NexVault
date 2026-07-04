@@ -65,11 +65,24 @@ class TransactionTracker {
 
       if (this._tracking.has(txHash)) {
         const entry = this._tracking.get(txHash);
-        entry.status = receipt.status === 1 ? 'confirmed' : 'failed';
+        const newStatus = receipt.status === 1 ? 'SUCCESS' : 'FAILED';
+        entry.status = newStatus === 'SUCCESS' ? 'confirmed' : 'failed';
         entry.receipt = receipt;
         this._tracking.set(txHash, entry);
         this._notifyListeners();
         
+        // Update backend status
+        this._updateBackendStatus(txHash, newStatus, receipt.gasUsed && receipt.gasPrice ? (receipt.gasUsed * receipt.gasPrice).toString() : null);
+
+        // Force an immediate UI balance refresh
+        if (newStatus === 'SUCCESS') {
+          import('../data/TokenDataManager.js').then(module => {
+            if (module && module.default) {
+              module.default.fetchAllData();
+            }
+          }).catch(err => console.warn('Failed to trigger balance refresh:', err));
+        }
+
         // Auto-remove confirmed/failed tx after some time to avoid memory leaks
         setTimeout(() => this.untrack(txHash), 60000);
       }
@@ -80,7 +93,26 @@ class TransactionTracker {
         entry.error = error.message;
         this._tracking.set(txHash, entry);
         this._notifyListeners();
+        
+        // Update backend status
+        this._updateBackendStatus(txHash, 'FAILED');
       }
+    }
+  }
+
+  async _updateBackendStatus(txHash, status, networkFee = null) {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const body = { status };
+      if (networkFee) body.networkFee = networkFee;
+      
+      await fetch(`${apiUrl}/transactions/${txHash}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    } catch (err) {
+      console.warn("Failed to update transaction status in backend:", err);
     }
   }
 

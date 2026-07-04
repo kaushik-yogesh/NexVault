@@ -78,7 +78,7 @@ export const getTokens = asyncHandler(async (req, res) => {
         
         let formattedBalance = '0';
         if (metadata && metadata.decimals) {
-          formattedBalance = ethers.formatUnits(token.tokenBalance, metadata.decimals);
+          formattedBalance = ethers.utils.formatUnits(token.tokenBalance, metadata.decimals);
         }
 
         return {
@@ -98,6 +98,11 @@ export const getTokens = asyncHandler(async (req, res) => {
       data: tokensWithMetadata,
     });
   } catch (error) {
+    if (error.message && error.message.includes('tenant disabled')) {
+      // Gracefully handle disabled Alchemy keys by returning empty arrays
+      // so the client doesn't break.
+      return res.json({ success: true, data: [] });
+    }
     throw ApiError.internal('Failed to fetch tokens: ' + error.message);
   }
 });
@@ -127,6 +132,11 @@ export const getNFTs = asyncHandler(async (req, res) => {
       data: data.ownedNfts || [],
     });
   } catch (error) {
+    // Gracefully handle disabled Alchemy keys by returning empty arrays
+    // so the client doesn't break.
+    if (error.message && error.message.includes('tenant disabled')) {
+      return res.json({ success: true, data: [] });
+    }
     throw ApiError.internal('Failed to fetch NFTs: ' + error.message);
   }
 });
