@@ -3,10 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { loginAdmin, clearError } from '../store/slices/authSlice';
 import toast from 'react-hot-toast';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState(null);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -28,7 +30,11 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!email || !password) return;
-    dispatch(loginAdmin({ email, password }));
+    if (!turnstileToken) {
+      toast.error('Please complete the security challenge.');
+      return;
+    }
+    dispatch(loginAdmin({ email, password, 'cf-turnstile-response': turnstileToken }));
   };
 
   return (
@@ -61,6 +67,18 @@ export default function Login() {
               className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               placeholder="••••••••"
               required
+            />
+          </div>
+
+          <div className="flex justify-center my-4">
+            <Turnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onError={() => toast.error('Turnstile error. Please refresh.')}
+              onExpire={() => setTurnstileToken(null)}
+              options={{
+                theme: 'dark'
+              }}
             />
           </div>
 

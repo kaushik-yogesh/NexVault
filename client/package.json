@@ -12,6 +12,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.5.3",
     "@reduxjs/toolkit": "^2.5.0",
     "@sentry/browser": "^8.38.0",
     "@sentry/react": "^8.38.0",

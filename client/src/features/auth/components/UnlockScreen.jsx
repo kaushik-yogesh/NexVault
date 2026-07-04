@@ -5,12 +5,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { HiOutlineLockClosed } from 'react-icons/hi2';
 import Input from '../../../shared/components/ui/Input.jsx';
 import Button from '../../../shared/components/ui/Button.jsx';
 import { unlockWallet, unlockWithBiometric, checkBiometricStatus, clearError } from '../../wallet/walletSlice.js';
 import { HiOutlineFingerPrint } from 'react-icons/hi2';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function UnlockScreen() {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ export default function UnlockScreen() {
   const { isLoading, error, isUnlocked, isInitialized, hasBiometricEnabled } = useSelector((state) => state.wallet);
   const [password, setPassword] = useState('');
   const [attempts, setAttempts] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState(null);
 
   useEffect(() => {
     dispatch(checkBiometricStatus());
@@ -42,8 +45,12 @@ export default function UnlockScreen() {
   const handleUnlock = async (e) => {
     e.preventDefault();
     if (!password.trim()) return;
+    if (!turnstileToken) {
+      toast.error('Please complete the security challenge.');
+      return;
+    }
 
-    const result = await dispatch(unlockWallet({ password }));
+    const result = await dispatch(unlockWallet({ password, turnstileToken }));
     if (unlockWallet.fulfilled.match(result)) {
       navigate(`/dashboard${location.search}`);
     } else {

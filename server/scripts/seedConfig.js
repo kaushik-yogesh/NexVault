@@ -59,6 +59,48 @@ const defaultConfigs = [
     type: 'FEATURE_FLAG',
     category: 'FEATURE_TOGGLES',
     description: 'Toggle to enable or disable the swap feature globally'
+  },
+  {
+    key: 'SECURITY_TURNSTILE_ENABLED',
+    value: true,
+    type: 'SECURITY',
+    category: 'SECURITY',
+    description: 'Enable Cloudflare Turnstile on auth and sensitive routes'
+  },
+  {
+    key: 'SECURITY_VPN_BLOCK',
+    value: false,
+    type: 'SECURITY',
+    category: 'SECURITY',
+    description: 'Block high threat score IPs (VPN/Datacenter)'
+  },
+  {
+    key: 'SECURITY_BOT_BLOCK',
+    value: true,
+    type: 'SECURITY',
+    category: 'SECURITY',
+    description: 'Block requests with low CF-Bot-Score'
+  },
+  {
+    key: 'RATE_LIMIT_LOGIN',
+    value: 5,
+    type: 'SECURITY',
+    category: 'RATE_LIMITS',
+    description: 'Max login attempts per minute per IP'
+  },
+  {
+    key: 'RATE_LIMIT_SWAP',
+    value: 30,
+    type: 'SECURITY',
+    category: 'RATE_LIMITS',
+    description: 'Max swap operations per minute per IP'
+  },
+  {
+    key: 'RATE_LIMIT_API',
+    value: 60,
+    type: 'SECURITY',
+    category: 'RATE_LIMITS',
+    description: 'Max general API requests per minute per IP'
   }
 ];
 

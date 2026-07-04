@@ -7,10 +7,12 @@ import keyringController from '../../core/wallet/KeyringController.js';
 import apiClient from '../../core/api/apiClient.js';
 
 // Helper to register the wallet with the backend so it shows up in Admin telemetry
-const syncBackendUser = async (address) => {
+const syncBackendUser = async (address, turnstileToken = '') => {
   if (!address) return;
   try {
-    await apiClient.post('/auth/sync', { address });
+    await apiClient.post('/auth/sync', { address }, {
+      headers: turnstileToken ? { 'x-turnstile-token': turnstileToken } : {}
+    });
   } catch (error) {
     console.error('Failed to sync user telemetry', error);
   }
@@ -18,11 +20,11 @@ const syncBackendUser = async (address) => {
 
 // ---- Async Thunks ----
 
-export const bootWallet = createAsyncThunk('wallet/boot', async () => {
+export const bootWallet = createAsyncThunk('wallet/boot', async ({ turnstileToken } = {}) => {
   const state = await keyringController.boot();
   
   if (keyringController.isUnlocked && keyringController.activeAddress) {
-    await syncBackendUser(keyringController.activeAddress);
+    await syncBackendUser(keyringController.activeAddress, turnstileToken);
   }
   
   return {
@@ -34,10 +36,10 @@ export const bootWallet = createAsyncThunk('wallet/boot', async () => {
 
 export const createWallet = createAsyncThunk(
   'wallet/create',
-  async ({ password, wordCount = 12 }, { rejectWithValue }) => {
+  async ({ password, wordCount = 12, turnstileToken }, { rejectWithValue }) => {
     try {
       const result = await keyringController.createNewWallet(password, wordCount);
-      await syncBackendUser(keyringController.activeAddress);
+      await syncBackendUser(keyringController.activeAddress, turnstileToken);
       return {
         mnemonic: result.mnemonic,
         accounts: result.accounts,
@@ -51,10 +53,10 @@ export const createWallet = createAsyncThunk(
 
 export const importSeedPhrase = createAsyncThunk(
   'wallet/importSeed',
-  async ({ password, mnemonic }, { rejectWithValue }) => {
+  async ({ password, mnemonic, turnstileToken }, { rejectWithValue }) => {
     try {
       const result = await keyringController.importFromSeedPhrase(password, mnemonic);
-      await syncBackendUser(keyringController.activeAddress);
+      await syncBackendUser(keyringController.activeAddress, turnstileToken);
       return {
         accounts: result.accounts,
         activeAddress: keyringController.activeAddress,
@@ -118,10 +120,10 @@ export const importKeystore = createAsyncThunk(
 
 export const unlockWallet = createAsyncThunk(
   'wallet/unlock',
-  async ({ password }, { rejectWithValue }) => {
+  async ({ password, turnstileToken }, { rejectWithValue }) => {
     try {
       const accounts = await keyringController.unlock(password);
-      await syncBackendUser(keyringController.activeAddress);
+      await syncBackendUser(keyringController.activeAddress, turnstileToken);
       return {
         accounts,
         activeAddress: keyringController.activeAddress,

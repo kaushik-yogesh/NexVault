@@ -14,25 +14,38 @@ import transactionRoutes from './transaction.routes.js';
 import walletRoutes from './wallet.routes.js';
 import pricingRoutes from './pricing.routes.js';
 import configRoutes from './config.routes.js';
+import { 
+  loginLimiter, 
+  apiLimiter, 
+  swapLimiter, 
+  detectBot, 
+  detectVPN, 
+  requestLogger 
+} from '../middleware/security.js';
 
 const router = Router();
 
-// Public routes
-router.use('/auth', authRoutes);
-router.use('/chains', chainRoutes);
-router.use('/swap', swapRoutes);
-router.use('/security', securityRoutes);
-router.use('/transactions', transactionRoutes);
-router.use('/wallet', walletRoutes);
-router.use('/pricing', pricingRoutes);
-router.use('/config', configRoutes);
+// Apply global security headers detection and logging
+router.use(requestLogger);
+router.use(detectBot);
+router.use(detectVPN);
+
+// Public routes with API rate limiter
+router.use('/auth', loginLimiter, authRoutes);
+router.use('/chains', apiLimiter, chainRoutes);
+router.use('/swap', swapLimiter, swapRoutes);
+router.use('/security', apiLimiter, securityRoutes);
+router.use('/transactions', apiLimiter, transactionRoutes);
+router.use('/wallet', apiLimiter, walletRoutes);
+router.use('/pricing', apiLimiter, pricingRoutes);
+router.use('/config', apiLimiter, configRoutes);
 
 // Admin Public routes
-router.use('/admin/auth', adminAuthRoutes);
+router.use('/admin/auth', loginLimiter, adminAuthRoutes);
 
 // Protected Admin Routes
-router.use('/admin', adminRoutes);
-router.use('/admin/audit', auditRoutes);
+router.use('/admin', apiLimiter, adminRoutes);
+router.use('/admin/audit', apiLimiter, auditRoutes);
 
 // API info
 router.get('/', (req, res) => {

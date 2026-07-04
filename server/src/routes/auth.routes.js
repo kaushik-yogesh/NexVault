@@ -8,6 +8,7 @@ import { SiweMessage } from 'siwe';
 import jwt from 'jsonwebtoken';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 import User from '../models/User.js';
+import { verifyTurnstile } from '../middleware/security.js';
 
 const router = Router();
 
@@ -20,6 +21,7 @@ const nonceStore = new Map();
  */
 router.post(
   '/sync',
+  verifyTurnstile,
   asyncHandler(async (req, res) => {
     const { address } = req.body;
     if (!address) {

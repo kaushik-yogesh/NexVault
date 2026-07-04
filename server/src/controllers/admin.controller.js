@@ -4,6 +4,7 @@ import Transaction from '../models/Transaction.js';
 import AppConfig from '../models/AppConfig.js';
 import Admin from '../models/Admin.js';
 import configService from '../services/configService.js';
+import SecurityEvent from '../models/SecurityEvent.js';
 
 /**
  * Get dashboard analytics
@@ -245,4 +246,26 @@ export const getTransactions = asyncHandler(async (req, res) => {
       }
     }
   });
+});
+
+
+/**
+ * Get Security Events
+ * GET /api/admin/security/events
+ */
+export const getSecurityEvents = asyncHandler(async (req, res) => {
+  const events = await SecurityEvent.find().sort({ createdAt: -1 }).limit(100);
+  res.json(events);
+});
+
+/**
+ * Get Security Stats
+ * GET /api/admin/security/stats
+ */
+export const getSecurityStats = asyncHandler(async (req, res) => {
+  const total = await SecurityEvent.countDocuments();
+  const bySeverity = await SecurityEvent.aggregate([{ $group: { _id: "$severity", count: { $sum: 1 } } }]);
+  const byType = await SecurityEvent.aggregate([{ $group: { _id: "$eventType", count: { $sum: 1 } } }]);
+  
+  res.json({ total, bySeverity, byType });
 });

@@ -6,6 +6,8 @@ import {
   getConfig,
   updateConfig,
   getTransactions,
+  getSecurityEvents,
+  getSecurityStats,
 } from '../controllers/admin.controller.js';
 import {
   generateTOTPSecret,
@@ -43,6 +45,10 @@ router.get('/swap-analytics/treasury', requireRole('SUPER_ADMIN', 'ADMIN'), getT
 // Configuration (Fees, Treasury)
 router.get('/config', requireRole('SUPER_ADMIN', 'ADMIN'), getConfig);
 router.put('/config', requireRole('SUPER_ADMIN'), auditAction('CONFIG'), updateConfig);
+
+// Security Dashboard
+router.get('/security/events', requireRole('SUPER_ADMIN', 'ADMIN', 'SUPPORT'), getSecurityEvents);
+router.get('/security/stats', requireRole('SUPER_ADMIN', 'ADMIN', 'SUPPORT'), getSecurityStats);
 
 // 2FA Management
 router.post('/2fa/setup', generateTOTPSecret);
