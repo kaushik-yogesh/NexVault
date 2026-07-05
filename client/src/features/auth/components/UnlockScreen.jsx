@@ -113,6 +113,16 @@ export default function UnlockScreen() {
             </div>
           )}
 
+          <div className="flex justify-center my-2">
+            <Turnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onError={() => toast.error('Turnstile error. Please refresh.')}
+              onExpire={() => setTurnstileToken(null)}
+              options={{ theme: 'dark' }}
+            />
+          </div>
+
           {hasBiometricEnabled ? (
             <div className="flex gap-3">
               <div className="flex-1">
