@@ -1,0 +1,713 @@
+
+> nexvault@1.0.0 lint
+> eslint .
+
+(node:22824) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/yoges/OneDrive/Desktop/CryptoWallet/eslint.config.js?mtime=1783229577407 is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\yoges\OneDrive\Desktop\CryptoWallet\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\App.jsx
+   1:10  warning  'Routes' is defined but never used                   no-unused-vars
+   1:18  warning  'Route' is defined but never used                    no-unused-vars
+   1:25  warning  'Navigate' is defined but never used                 no-unused-vars
+   3:8   warning  'Login' is defined but never used                    no-unused-vars
+   4:8   warning  'Dashboard' is defined but never used                no-unused-vars
+   5:8   warning  'Users' is defined but never used                    no-unused-vars
+   6:8   warning  'Swaps' is defined but never used                    no-unused-vars
+   7:8   warning  'Config' is defined but never used                   no-unused-vars
+   8:8   warning  'Security' is defined but never used                 no-unused-vars
+   9:8   warning  'Transfers' is defined but never used                no-unused-vars
+  10:8   warning  'Layout' is defined but never used                   no-unused-vars
+  12:7   warning  'ProtectedRoute' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\components\Layout.jsx
+  1:10  warning  'Outlet' is defined but never used   no-unused-vars
+  2:8   warning  'Sidebar' is defined but never used  no-unused-vars
+  3:8   warning  'Topbar' is defined but never used   no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\components\Sidebar.jsx
+   1:10  warning  'NavLink' is defined but never used     no-unused-vars
+   8:3   warning  'FiDatabase' is defined but never used  no-unused-vars
+  11:10  warning  'motion' is defined but never used      no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\components\Topbar.jsx
+  2:10  warning  'FiLogOut' is defined but never used  no-unused-vars
+  2:20  warning  'FiUser' is defined but never used    no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\main.jsx
+  1:10  warning  'StrictMode' is defined but never used     no-unused-vars
+  3:10  warning  'Provider' is defined but never used       no-unused-vars
+  4:10  warning  'BrowserRouter' is defined but never used  no-unused-vars
+  5:10  warning  'Toaster' is defined but never used        no-unused-vars
+  8:8   warning  'App' is defined but never used            no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\pages\Config.jsx
+  28:16  warning  'err' is defined but never used  no-unused-vars
+  57:14  warning  'err' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\pages\Dashboard.jsx
+  5:10  warning  'BarChart' is defined but never used             no-unused-vars
+  5:20  warning  'Bar' is defined but never used                  no-unused-vars
+  5:25  warning  'XAxis' is defined but never used                no-unused-vars
+  5:32  warning  'YAxis' is defined but never used                no-unused-vars
+  5:39  warning  'Tooltip' is defined but never used              no-unused-vars
+  5:48  warning  'ResponsiveContainer' is defined but never used  no-unused-vars
+  5:69  warning  'LineChart' is defined but never used            no-unused-vars
+  5:80  warning  'Line' is defined but never used                 no-unused-vars
+  6:10  warning  'motion' is defined but never used               no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\pages\Login.jsx
+  6:10  warning  'Turnstile' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\pages\Security.jsx
+   4:10  warning  'FiShield' is defined but never used         no-unused-vars
+   4:20  warning  'FiAlertTriangle' is defined but never used  no-unused-vars
+   4:37  warning  'FiActivity' is defined but never used       no-unused-vars
+   4:49  warning  'FiLock' is defined but never used           no-unused-vars
+  32:14  warning  'err' is defined but never used              no-unused-vars
+  65:14  warning  'err' is defined but never used              no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\pages\Swaps.jsx
+  2:10  warning  'FiSearch' is defined but never used             no-unused-vars
+  2:20  warning  'FiExternalLink' is defined but never used       no-unused-vars
+  2:36  warning  'FiPieChart' is defined but never used           no-unused-vars
+  2:48  warning  'FiTrendingUp' is defined but never used         no-unused-vars
+  2:62  warning  'FiAlertCircle' is defined but never used        no-unused-vars
+  2:77  warning  'FiBox' is defined but never used                no-unused-vars
+  4:10  warning  'motion' is defined but never used               no-unused-vars
+  5:10  warning  'PieChart' is defined but never used             no-unused-vars
+  5:20  warning  'Pie' is defined but never used                  no-unused-vars
+  5:25  warning  'Cell' is defined but never used                 no-unused-vars
+  5:31  warning  'Tooltip' is defined but never used              no-unused-vars
+  5:40  warning  'ResponsiveContainer' is defined but never used  no-unused-vars
+  5:61  warning  'BarChart' is defined but never used             no-unused-vars
+  5:71  warning  'Bar' is defined but never used                  no-unused-vars
+  5:76  warning  'XAxis' is defined but never used                no-unused-vars
+  5:83  warning  'YAxis' is defined but never used                no-unused-vars
+  5:90  warning  'CartesianGrid' is defined but never used        no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\pages\Transfers.jsx
+  2:10  warning  'FiSearch' is defined but never used        no-unused-vars
+  2:20  warning  'FiExternalLink' is defined but never used  no-unused-vars
+  4:10  warning  'motion' is defined but never used          no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\admin\src\pages\Users.jsx
+  4:10  warning  'FiSearch' is defined but never used        no-unused-vars
+  4:20  warning  'FiMoreVertical' is defined but never used  no-unused-vars
+  6:10  warning  'motion' is defined but never used          no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\App.jsx
+   7:10  warning  'HashRouter' is defined but never used               no-unused-vars
+   8:10  warning  'Toaster' is defined but never used                  no-unused-vars
+   9:8   warning  'AppRouter' is defined but never used                no-unused-vars
+  13:7   warning  'ErrorBoundary' is defined but never used            no-unused-vars
+  44:9   warning  'isConfigLoaded' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\background\index.js
+   19:1   error    'chrome' is not defined                              no-undef
+   23:3   error    'chrome' is not defined                              no-undef
+   30:1   error    'chrome' is not defined                              no-undef
+   33:5   error    'chrome' is not defined                              no-undef
+   41:5   error    'chrome' is not defined                              no-undef
+   42:3   error    'chrome' is not defined                              no-undef
+   42:57  warning  'tab' is defined but never used                      no-unused-vars
+   46:9   error    'chrome' is not defined                              no-undef
+   47:16  error    'chrome' is not defined                              no-undef
+   55:1   error    'chrome' is not defined                              no-undef
+   70:7   error    'chrome' is not defined                              no-undef
+   71:7   error    'chrome' is not defined                              no-undef
+  158:7   error    Unexpected lexical declaration in case block         no-case-declarations
+  214:9   warning  'pendingPromise' is assigned a value but never used  no-unused-vars
+  236:5   error    'chrome' is not defined                              no-undef
+  247:1   error    'chrome' is not defined                              no-undef
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\content\index.js
+  12:18  error  'chrome' is not defined  no-undef
+  37:28  error  'chrome' is not defined  no-undef
+  58:1   error  'chrome' is not defined  no-undef
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\content\injectProvider.js
+  166:12  warning  'err' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\api\pricingService.js
+   20:14  warning  'e' is defined but never used  no-unused-vars
+   34:16  warning  'e' is defined but never used  no-unused-vars
+   34:19  error    Empty block statement          no-empty
+   78:17  warning  'e' is defined but never used  no-unused-vars
+   78:20  error    Empty block statement          no-empty
+  124:17  warning  'e' is defined but never used  no-unused-vars
+  124:20  error    Empty block statement          no-empty
+  161:15  warning  'e' is defined but never used  no-unused-vars
+  161:18  error    Empty block statement          no-empty
+  190:15  warning  'e' is defined but never used  no-unused-vars
+  190:18  error    Empty block statement          no-empty
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\data\TokenDataManager.js
+  99:13  warning  'tokenAddresses' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\dex\QuoteEngine.js
+  3:10  warning  'ethers' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\dex\providers\AerodromeProvider.js
+  43:16  warning  'err' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\dex\providers\DexProvider.js
+  25:18  warning  'sellToken' is defined but never used         no-unused-vars
+  25:29  warning  'buyToken' is defined but never used          no-unused-vars
+  25:39  warning  'amountIn' is defined but never used          no-unused-vars
+  25:49  warning  'provider' is defined but never used          no-unused-vars
+  40:18  warning  'sellToken' is defined but never used         no-unused-vars
+  40:29  warning  'buyToken' is defined but never used          no-unused-vars
+  40:39  warning  'amountIn' is defined but never used          no-unused-vars
+  40:49  warning  'amountOutMinimum' is defined but never used  no-unused-vars
+  40:67  warning  'recipient' is defined but never used         no-unused-vars
+  40:78  warning  'routeData' is defined but never used         no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\dex\providers\UniswapV2Provider.js
+  46:16  warning  'err' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\dex\providers\UniswapV3Provider.js
+  55:16  warning  'err' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\network\NetworkManager.js
+  64:16  warning  'error' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\network\ProviderManager.js
+  13:18  warning  'CHAIN_IDS' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\nfts\NFTFetcher.js
+  29:16  warning  'e' is defined but never used  no-unused-vars
+  39:16  warning  'e' is defined but never used  no-unused-vars
+  47:16  warning  'e' is defined but never used  no-unused-vars
+  61:16  warning  'e' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\security\PhishingDetector.js
+  19:14  warning  'e' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\vault\BiometricManager.js
+  21:14  warning  'e' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\vault\CryptoEngine.js
+  110:14  warning  'error' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\vault\ExtensionStore.js
+  22:45  error  'chrome' is not defined  no-undef
+  29:7   error  'chrome' is not defined  no-undef
+  43:45  error  'chrome' is not defined  no-undef
+  49:7   error  'chrome' is not defined  no-undef
+  62:45  error  'chrome' is not defined  no-undef
+  68:7   error  'chrome' is not defined  no-undef
+  80:45  error  'chrome' is not defined  no-undef
+  86:7   error  'chrome' is not defined  no-undef
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\vault\HardwareWalletManager.js
+    8:10  warning  'ethers' is defined but never used     no-unused-vars
+   97:25  warning  'txRequest' is defined but never used  no-unused-vars
+  106:25  warning  'txRequest' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\vault\VaultManager.js
+  322:39  warning  'e' is defined but never used  no-unused-vars
+  322:42  error    Empty block statement          no-empty
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\wallet\KeyringController.js
+  170:25  warning  '_' is assigned a value but never used  no-unused-vars
+  207:25  warning  '_' is assigned a value but never used  no-unused-vars
+  248:25  warning  '_' is assigned a value but never used  no-unused-vars
+  327:25  warning  '_' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\wallet\WalletConnectService.js
+   11:8   warning  'providerManager' is defined but never used   no-unused-vars
+   95:9   error    'chrome' is not defined                       no-undef
+   96:16  warning  'e' is defined but never used                 no-unused-vars
+  109:15  warning  'request' is assigned a value but never used  no-unused-vars
+  109:24  warning  'chainId' is assigned a value but never used  no-unused-vars
+  123:9   error    'chrome' is not defined                       no-undef
+  124:16  warning  'e' is defined but never used                 no-unused-vars
+  136:9   error    'chrome' is not defined                       no-undef
+  137:15  warning  'e' is defined but never used                 no-unused-vars
+  137:18  error    Empty block statement                         no-empty
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\core\wallet\WalletManager.js
+  372:36  warning  'privateKey' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\approvals\components\ApprovalManagerPage.jsx
+   1:8   warning  'React' is defined but never used                         no-unused-vars
+   3:10  warning  'motion' is defined but never used                        no-unused-vars
+   4:10  warning  'HiOutlineShieldCheck' is defined but never used          no-unused-vars
+   4:32  warning  'HiOutlineExclamationTriangle' is defined but never used  no-unused-vars
+   4:62  warning  'HiArrowPath' is defined but never used                   no-unused-vars
+   7:8   warning  'RevokeButton' is defined but never used                  no-unused-vars
+   8:8   warning  'Spinner' is defined but never used                       no-unused-vars
+  13:40  warning  'lastFetchedChainId' is assigned a value but never used   no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\approvals\components\RevokeButton.jsx
+  1:8   warning  'React' is defined but never used                       no-unused-vars
+  2:10  warning  'useDispatch' is defined but never used                 no-unused-vars
+  4:10  warning  'HiOutlineShieldCheck' is defined but never used        no-unused-vars
+  4:32  warning  'HiOutlineShieldExclamation' is defined but never used  no-unused-vars
+  5:8   warning  'Button' is defined but never used                      no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\auth\components\UnlockScreen.jsx
+   5:8   warning  'React' is defined but never used                       no-unused-vars
+   9:10  warning  'motion' is defined but never used                      no-unused-vars
+  11:8   warning  'Input' is defined but never used                       no-unused-vars
+  12:8   warning  'Button' is defined but never used                      no-unused-vars
+  14:10  warning  'HiOutlineFingerPrint' is defined but never used        no-unused-vars
+  15:10  warning  'Turnstile' is defined but never used                   no-unused-vars
+  24:26  warning  'setTurnstileToken' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\contacts\components\AddressBookPage.jsx
+   6:8   warning  'React' is defined but never used               no-unused-vars
+   8:10  warning  'motion' is defined but never used              no-unused-vars
+   8:18  warning  'AnimatePresence' is defined but never used     no-unused-vars
+   9:10  warning  'HiOutlineUserPlus' is defined but never used   no-unused-vars
+   9:29  warning  'HiOutlineTrash' is defined but never used      no-unused-vars
+   9:45  warning  'HiOutlineUserGroup' is defined but never used  no-unused-vars
+  10:8   warning  'Input' is defined but never used               no-unused-vars
+  11:8   warning  'Button' is defined but never used              no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\explore\components\ExplorePage.jsx
+   5:8   warning  'React' is defined but never used                           no-unused-vars
+   6:10  warning  'motion' is defined but never used                          no-unused-vars
+   7:10  warning  'HiOutlineMagnifyingGlass' is defined but never used        no-unused-vars
+   7:36  warning  'HiOutlineArrowTopRightOnSquare' is defined but never used  no-unused-vars
+   7:68  warning  'HiOutlineArrowLeft' is defined but never used              no-unused-vars
+  71:10  warning  'activeWebUrl' is assigned a value but never used           no-unused-vars
+  71:24  warning  'setActiveWebUrl' is assigned a value but never used        no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\history\components\TransactionHistory.jsx
+    5:8   warning  'React' is defined but never used            no-unused-vars
+    7:10  warning  'motion' is defined but never used           no-unused-vars
+   12:3   warning  'HiOutlineFunnel' is defined but never used  no-unused-vars
+  155:21  warning  'Icon' is assigned a value but never used    no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\nfts\components\ImportNFTModal.jsx
+   5:8   warning  'React' is defined but never used            no-unused-vars
+   7:10  warning  'motion' is defined but never used           no-unused-vars
+   7:18  warning  'AnimatePresence' is defined but never used  no-unused-vars
+   8:10  warning  'HiXMark' is defined but never used          no-unused-vars
+   9:8   warning  'Input' is defined but never used            no-unused-vars
+  10:8   warning  'Button' is defined but never used           no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\nfts\components\NFTDetailsPage.jsx
+   6:8   warning  'React' is defined but never used                   no-unused-vars
+   9:10  warning  'motion' is defined but never used                  no-unused-vars
+  10:10  warning  'HiOutlineArrowLeft' is defined but never used      no-unused-vars
+  10:30  warning  'HiOutlinePaperAirplane' is defined but never used  no-unused-vars
+  10:54  warning  'HiOutlineTrash' is defined but never used          no-unused-vars
+  11:8   warning  'Button' is defined but never used                  no-unused-vars
+  23:10  warning  'isSending' is assigned a value but never used      no-unused-vars
+  23:21  warning  'setIsSending' is assigned a value but never used   no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\nfts\components\NFTGallery.jsx
+   6:8   warning  'React' is defined but never used           no-unused-vars
+   7:10  warning  'motion' is defined but never used          no-unused-vars
+   8:10  warning  'HiOutlinePhoto' is defined but never used  no-unused-vars
+   8:26  warning  'HiOutlinePlus' is defined but never used   no-unused-vars
+  10:8   warning  'ImportNFTModal' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\onboarding\components\ImportWallet.jsx
+    5:8   warning  'React' is defined but never used   no-unused-vars
+    8:10  warning  'motion' is defined but never used  no-unused-vars
+   14:8   warning  'Input' is defined but never used   no-unused-vars
+   15:8   warning  'Button' is defined but never used  no-unused-vars
+  122:48  warning  'Icon' is defined but never used    no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\onboarding\components\SeedPhraseDisplay.jsx
+   5:8   warning  'React' is defined but never used                         no-unused-vars
+   7:23  warning  'useDispatch' is defined but never used                   no-unused-vars
+   8:10  warning  'motion' is defined but never used                        no-unused-vars
+  10:3   warning  'HiOutlineEye' is defined but never used                  no-unused-vars
+  11:3   warning  'HiOutlineEyeSlash' is defined but never used             no-unused-vars
+  12:3   warning  'HiOutlineClipboard' is defined but never used            no-unused-vars
+  13:3   warning  'HiOutlineExclamationTriangle' is defined but never used  no-unused-vars
+  15:8   warning  'Button' is defined but never used                        no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\onboarding\components\SeedPhraseVerify.jsx
+  5:8   warning  'React' is defined but never used   no-unused-vars
+  8:10  warning  'motion' is defined but never used  no-unused-vars
+  9:8   warning  'Button' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\onboarding\components\SetPassword.jsx
+   5:8   warning  'React' is defined but never used                 no-unused-vars
+   8:10  warning  'motion' is defined but never used                no-unused-vars
+   9:31  warning  'HiOutlineShieldCheck' is defined but never used  no-unused-vars
+  10:8   warning  'Input' is defined but never used                 no-unused-vars
+  11:8   warning  'Button' is defined but never used                no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\onboarding\components\Welcome.jsx
+   5:8   warning  'React' is defined but never used                 no-unused-vars
+   7:10  warning  'motion' is defined but never used                no-unused-vars
+  11:3   warning  'HiOutlineShieldCheck' is defined but never used  no-unused-vars
+  13:8   warning  'Button' is defined but never used                no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\permissions\GlobalModals.jsx
+   6:8  warning  'React' is defined but never used                  no-unused-vars
+   8:8  warning  'ConnectModal' is defined but never used           no-unused-vars
+   9:8  warning  'SignModal' is defined but never used              no-unused-vars
+  10:8  warning  'TransactionPrompt' is defined but never used      no-unused-vars
+  11:8  warning  'SwitchNetworkModal' is defined but never used     no-unused-vars
+  21:5  warning  'clearRequest' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\permissions\components\ConnectModal.jsx
+   6:8   warning  'React' is defined but never used                       no-unused-vars
+   8:10  warning  'motion' is defined but never used                      no-unused-vars
+   8:18  warning  'AnimatePresence' is defined but never used             no-unused-vars
+   9:10  warning  'HiOutlineGlobeAlt' is defined but never used           no-unused-vars
+   9:29  warning  'HiCheck' is defined but never used                     no-unused-vars
+   9:38  warning  'HiOutlineShieldExclamation' is defined but never used  no-unused-vars
+  10:8   warning  'Button' is defined but never used                      no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\permissions\components\ConnectedSitesPage.jsx
+   6:8   warning  'React' is defined but never used               no-unused-vars
+   6:28  warning  'useState' is defined but never used            no-unused-vars
+   8:10  warning  'motion' is defined but never used              no-unused-vars
+   9:10  warning  'HiOutlineGlobeAlt' is defined but never used   no-unused-vars
+   9:29  warning  'HiOutlineTrash' is defined but never used      no-unused-vars
+  10:8   warning  'Button' is defined but never used              no-unused-vars
+  15:31  warning  'isLoading' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\permissions\components\SignModal.jsx
+   6:8   warning  'React' is defined but never used                       no-unused-vars
+   8:10  warning  'motion' is defined but never used                      no-unused-vars
+   8:18  warning  'AnimatePresence' is defined but never used             no-unused-vars
+   9:10  warning  'HiOutlineDocumentText' is defined but never used       no-unused-vars
+   9:33  warning  'HiOutlineShieldExclamation' is defined but never used  no-unused-vars
+  10:8   warning  'Button' is defined but never used                      no-unused-vars
+  15:9   warning  'activeChain' is assigned a value but never used        no-unused-vars
+  49:14  warning  'err' is defined but never used                         no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\permissions\components\SwitchNetworkModal.jsx
+  6:8   warning  'React' is defined but never used                     no-unused-vars
+  7:10  warning  'motion' is defined but never used                    no-unused-vars
+  7:18  warning  'AnimatePresence' is defined but never used           no-unused-vars
+  8:10  warning  'HiOutlineGlobeAlt' is defined but never used         no-unused-vars
+  8:29  warning  'HiOutlineArrowsRightLeft' is defined but never used  no-unused-vars
+  9:8   warning  'Button' is defined but never used                    no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\permissions\components\TransactionPrompt.jsx
+    6:8   warning  'React' is defined but never used                       no-unused-vars
+    8:10  warning  'motion' is defined but never used                      no-unused-vars
+    8:18  warning  'AnimatePresence' is defined but never used             no-unused-vars
+    9:10  warning  'HiOutlineArrowsRightLeft' is defined but never used    no-unused-vars
+    9:36  warning  'HiOutlineShieldExclamation' is defined but never used  no-unused-vars
+    9:64  warning  'HiOutlineBolt' is defined but never used               no-unused-vars
+   11:8   warning  'Button' is defined but never used                      no-unused-vars
+   15:8   warning  'Spinner' is defined but never used                     no-unused-vars
+  127:13  warning  'provider' is assigned a value but never used           no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\permissions\components\WalletConnectPasteModal.jsx
+   6:8   warning  'React' is defined but never used            no-unused-vars
+   7:10  warning  'motion' is defined but never used           no-unused-vars
+   7:18  warning  'AnimatePresence' is defined but never used  no-unused-vars
+   8:10  warning  'HiXMark' is defined but never used          no-unused-vars
+   8:19  warning  'HiOutlineLink' is defined but never used    no-unused-vars
+   9:8   warning  'Input' is defined but never used            no-unused-vars
+  10:8   warning  'Button' is defined but never used           no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\permissions\hooks\useProviderRequest.js
+  15:48  error  'chrome' is not defined  no-undef
+  15:66  error  'chrome' is not defined  no-undef
+  17:7   error  'chrome' is not defined  no-undef
+  38:42  error  'chrome' is not defined  no-undef
+  38:60  error  'chrome' is not defined  no-undef
+  39:13  error  'chrome' is not defined  no-undef
+  51:42  error  'chrome' is not defined  no-undef
+  51:60  error  'chrome' is not defined  no-undef
+  52:13  error  'chrome' is not defined  no-undef
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\permissions\hooks\useWalletConnect.js
+  26:42  error  'chrome' is not defined  no-undef
+  26:60  error  'chrome' is not defined  no-undef
+  27:7   error  'chrome' is not defined  no-undef
+  30:44  error  'chrome' is not defined  no-undef
+  30:62  error  'chrome' is not defined  no-undef
+  31:9   error  'chrome' is not defined  no-undef
+  38:7   error  'chrome' is not defined  no-undef
+  48:7   error  'chrome' is not defined  no-undef
+  61:7   error  'chrome' is not defined  no-undef
+  75:7   error  'chrome' is not defined  no-undef
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\portfolio\components\Dashboard.jsx
+    8:10  warning  'motion' is defined but never used               no-unused-vars
+   13:3   warning  'HiOutlineEye' is defined but never used         no-unused-vars
+   14:3   warning  'HiOutlineEyeSlash' is defined but never used    no-unused-vars
+   15:3   warning  'HiOutlineClipboard' is defined but never used   no-unused-vars
+   18:8   warning  'Spinner' is defined but never used              no-unused-vars
+   20:8   warning  'ImportTokenModal' is defined but never used     no-unused-vars
+   23:8   warning  'NFTGallery' is defined but never used           no-unused-vars
+  127:22  warning  'fiatNative' is assigned a value but never used  no-unused-vars
+  257:35  warning  'Icon' is defined but never used                 no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\portfolio\components\StakingPage.jsx
+  1:8   warning  'React' is defined but never used         no-unused-vars
+  4:10  warning  'FiTrendingUp' is defined but never used  no-unused-vars
+  4:24  warning  'FiAward' is defined but never used       no-unused-vars
+  4:33  warning  'FiShield' is defined but never used      no-unused-vars
+  5:8   warning  'Button' is defined but never used        no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\receive\components\ReceiveModal.jsx
+   5:8   warning  'React' is defined but never used      no-unused-vars
+   7:10  warning  'motion' is defined but never used     no-unused-vars
+   8:10  warning  'QRCodeSVG' is defined but never used  no-unused-vars
+  16:8   warning  'Button' is defined but never used     no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\send\components\SendForm.jsx
+   5:8   warning  'React' is defined but never used                  no-unused-vars
+   8:10  warning  'motion' is defined but never used                 no-unused-vars
+  11:3   warning  'HiOutlineArrowsUpDown' is defined but never used  no-unused-vars
+  12:3   warning  'HiOutlineBolt' is defined but never used          no-unused-vars
+  14:8   warning  'Input' is defined but never used                  no-unused-vars
+  15:8   warning  'Button' is defined but never used                 no-unused-vars
+  16:8   warning  'Modal' is defined but never used                  no-unused-vars
+  17:8   warning  'Spinner' is defined but never used                no-unused-vars
+  33:9   warning  'dispatch' is assigned a value but never used      no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\settings\components\ExportKeystoreModal.jsx
+   6:8   warning  'React' is defined but never used                       no-unused-vars
+   8:10  warning  'motion' is defined but never used                      no-unused-vars
+   8:18  warning  'AnimatePresence' is defined but never used             no-unused-vars
+   9:10  warning  'HiXMark' is defined but never used                     no-unused-vars
+   9:19  warning  'HiOutlineDocumentArrowDown' is defined but never used  no-unused-vars
+  10:8   warning  'Input' is defined but never used                       no-unused-vars
+  11:8   warning  'Button' is defined but never used                      no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\settings\components\RevealSeedModal.jsx
+   6:8   warning  'React' is defined but never used                         no-unused-vars
+   7:10  warning  'motion' is defined but never used                        no-unused-vars
+   7:18  warning  'AnimatePresence' is defined but never used               no-unused-vars
+   9:3   warning  'HiXMark' is defined but never used                       no-unused-vars
+  10:3   warning  'HiOutlineDocumentDuplicate' is defined but never used    no-unused-vars
+  11:3   warning  'HiOutlineEye' is defined but never used                  no-unused-vars
+  12:3   warning  'HiOutlineEyeSlash' is defined but never used             no-unused-vars
+  13:3   warning  'HiOutlineClipboard' is defined but never used            no-unused-vars
+  14:3   warning  'HiOutlineExclamationTriangle' is defined but never used  no-unused-vars
+  16:8   warning  'Input' is defined but never used                         no-unused-vars
+  17:8   warning  'Button' is defined but never used                        no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\settings\components\SettingsPage.jsx
+   5:8   warning  'React' is defined but never used                        no-unused-vars
+   8:10  warning  'motion' is defined but never used                       no-unused-vars
+  18:3   warning  'HiOutlineChevronRight' is defined but never used        no-unused-vars
+  26:3   warning  'toggleShowBalances' is defined but never used           no-unused-vars
+  30:10  warning  'switchNetwork' is defined but never used                no-unused-vars
+  30:25  warning  'selectActiveChain' is defined but never used            no-unused-vars
+  32:8   warning  'ExportKeystoreModal' is defined but never used          no-unused-vars
+  33:8   warning  'RevealSeedModal' is defined but never used              no-unused-vars
+  38:10  warning  'showNetworkMenu' is assigned a value but never used     no-unused-vars
+  38:27  warning  'setShowNetworkMenu' is assigned a value but never used  no-unused-vars
+  57:9   warning  'SettingRow' is assigned a value but never used          no-unused-vars
+  57:31  warning  'Icon' is defined but never used                         no-unused-vars
+  88:9   warning  'Toggle' is assigned a value but never used              no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\swap\components\SwapForm.jsx
+    1:8   warning  'React' is defined but never used               no-unused-vars
+    4:10  warning  'FiArrowDown' is defined but never used         no-unused-vars
+    4:23  warning  'FiSettings' is defined but never used          no-unused-vars
+    4:35  warning  'FiRefreshCcw' is defined but never used        no-unused-vars
+    5:10  warning  'motion' is defined but never used              no-unused-vars
+    6:8   warning  'Button' is defined but never used              no-unused-vars
+    7:8   warning  'Modal' is defined but never used               no-unused-vars
+  385:9   warning  'TokenItem' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\tokens\components\ImportTokenModal.jsx
+   5:8   warning  'React' is defined but never used                     no-unused-vars
+   7:10  warning  'motion' is defined but never used                    no-unused-vars
+   7:18  warning  'AnimatePresence' is defined but never used           no-unused-vars
+   8:10  warning  'HiXMark' is defined but never used                   no-unused-vars
+   8:19  warning  'HiOutlineMagnifyingGlass' is defined but never used  no-unused-vars
+  10:8   warning  'Input' is defined but never used                     no-unused-vars
+  11:8   warning  'Button' is defined but never used                    no-unused-vars
+  89:16  warning  'err' is defined but never used                       no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\tokens\components\TokenDetailsPage.jsx
+    5:8   warning  'React' is defined but never used                     no-unused-vars
+    8:10  warning  'motion' is defined but never used                    no-unused-vars
+   10:3   warning  'HiOutlineArrowLeft' is defined but never used        no-unused-vars
+   11:3   warning  'HiOutlineTrash' is defined but never used            no-unused-vars
+   12:3   warning  'HiOutlinePaperAirplane' is defined but never used    no-unused-vars
+   13:3   warning  'HiOutlineQrCode' is defined but never used           no-unused-vars
+   14:3   warning  'HiOutlineArrowsRightLeft' is defined but never used  no-unused-vars
+   19:8   warning  'CandlestickChart' is defined but never used          no-unused-vars
+   22:10  warning  'getNativePrice' is defined but never used            no-unused-vars
+   22:26  warning  'getTokenPrices' is defined but never used            no-unused-vars
+   24:8   warning  'Button' is defined but never used                    no-unused-vars
+   25:8   warning  'Spinner' is defined but never used                   no-unused-vars
+  360:25  warning  'Icon' is assigned a value but never used             no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\tokens\tokensSlice.js
+  16:45  error  'chrome' is not defined  no-undef
+  19:10  error  'chrome' is not defined  no-undef
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\wallet\components\AddAccountPage.jsx
+   6:8   warning  'React' is defined but never used                       no-unused-vars
+   9:10  warning  'motion' is defined but never used                      no-unused-vars
+  10:10  warning  'HiOutlinePlus' is defined but never used               no-unused-vars
+  10:25  warning  'HiOutlineArrowDownOnSquare' is defined but never used  no-unused-vars
+  11:8   warning  'Input' is defined but never used                       no-unused-vars
+  12:8   warning  'Button' is defined but never used                      no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\wallet\components\ConnectHardware.jsx
+   1:8   warning  'React' is defined but never used              no-unused-vars
+   2:10  warning  'motion' is defined but never used             no-unused-vars
+   5:10  warning  'FaUsb' is defined but never used              no-unused-vars
+   6:8   warning  'Button' is defined but never used             no-unused-vars
+  11:9   warning  'dispatch' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\features\wallet\components\ImportAccountPage.jsx
+    6:8   warning  'React' is defined but never used   no-unused-vars
+    9:10  warning  'motion' is defined but never used  no-unused-vars
+   11:8   warning  'Input' is defined but never used   no-unused-vars
+   12:8   warning  'Button' is defined but never used  no-unused-vars
+  107:41  warning  'Icon' is defined but never used    no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\main.jsx
+   5:8   warning  'React' is defined but never used                no-unused-vars
+   7:10  warning  'Provider' is defined but never used             no-unused-vars
+   8:10  warning  'PersistGate' is defined but never used          no-unused-vars
+   9:23  warning  'QueryClientProvider' is defined but never used  no-unused-vars
+  11:8   warning  'App' is defined but never used                  no-unused-vars
+  14:13  warning  'Sentry' is defined but never used               no-unused-vars
+  31:38  error    'chrome' is not defined                          no-undef
+  31:56  error    'chrome' is not defined                          no-undef
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\router\AppRouter.jsx
+    5:8   warning  'React' is defined but never used                         no-unused-vars
+    5:17  warning  'Suspense' is defined but never used                      no-unused-vars
+    6:10  warning  'Routes' is defined but never used                        no-unused-vars
+    6:18  warning  'Route' is defined but never used                         no-unused-vars
+    6:25  warning  'Navigate' is defined but never used                      no-unused-vars
+    8:8   warning  'AppLayout' is defined but never used                     no-unused-vars
+    9:8   warning  'Spinner' is defined but never used                       no-unused-vars
+   12:7   warning  'Welcome' is assigned a value but never used              no-unused-vars
+   13:7   warning  'ImportWallet' is assigned a value but never used         no-unused-vars
+   14:7   warning  'SeedPhraseDisplay' is assigned a value but never used    no-unused-vars
+   15:7   warning  'SeedPhraseVerify' is assigned a value but never used     no-unused-vars
+   16:7   warning  'SetPassword' is assigned a value but never used          no-unused-vars
+   17:7   warning  'UnlockScreen' is assigned a value but never used         no-unused-vars
+   18:7   warning  'Dashboard' is assigned a value but never used            no-unused-vars
+   19:7   warning  'SendForm' is assigned a value but never used             no-unused-vars
+   20:7   warning  'ReceiveModal' is assigned a value but never used         no-unused-vars
+   21:7   warning  'ExplorePage' is assigned a value but never used          no-unused-vars
+   22:7   warning  'TransactionHistory' is assigned a value but never used   no-unused-vars
+   23:7   warning  'SettingsPage' is assigned a value but never used         no-unused-vars
+   24:7   warning  'AddAccountPage' is assigned a value but never used       no-unused-vars
+   25:7   warning  'ImportAccountPage' is assigned a value but never used    no-unused-vars
+   26:7   warning  'ConnectHardware' is assigned a value but never used      no-unused-vars
+   27:7   warning  'AddressBookPage' is assigned a value but never used      no-unused-vars
+   28:7   warning  'ApprovalManagerPage' is assigned a value but never used  no-unused-vars
+   29:7   warning  'ConnectedSitesPage' is assigned a value but never used   no-unused-vars
+   30:7   warning  'NFTDetailsPage' is assigned a value but never used       no-unused-vars
+   31:7   warning  'SwapForm' is assigned a value but never used             no-unused-vars
+   32:7   warning  'StakingPage' is assigned a value but never used          no-unused-vars
+   33:7   warning  'TokenDetailsPage' is assigned a value but never used     no-unused-vars
+   35:7   warning  'LoadingFallback' is assigned a value but never used      no-unused-vars
+   42:10  warning  'ProtectedRoute' is defined but never used                no-unused-vars
+   56:10  warning  'PublicRoute' is defined but never used                   no-unused-vars
+   67:22  warning  'isInitialized' is assigned a value but never used        no-unused-vars
+   67:37  warning  'isUnlocked' is assigned a value but never used           no-unused-vars
+  137:10  warning  'DefaultRedirect' is defined but never used               no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\shared\components\layout\AppLayout.jsx
+   5:8   warning  'React' is defined but never used                    no-unused-vars
+   6:10  warning  'Outlet' is defined but never used                   no-unused-vars
+   7:10  warning  'useSelector' is defined but never used              no-unused-vars
+   7:23  warning  'useDispatch' is defined but never used              no-unused-vars
+   8:10  warning  'motion' is defined but never used                   no-unused-vars
+  16:8   warning  'Header' is defined but never used                   no-unused-vars
+  17:8   warning  'GlobalModals' is defined but never used             no-unused-vars
+  18:8   warning  'WalletConnectPasteModal' is defined but never used  no-unused-vars
+  57:40  warning  'Icon' is defined but never used                     no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\shared\components\layout\Header.jsx
+   5:8   warning  'React' is defined but never used                    no-unused-vars
+   7:10  warning  'motion' is defined but never used                   no-unused-vars
+   7:18  warning  'AnimatePresence' is defined but never used          no-unused-vars
+   9:3   warning  'HiChevronDown' is defined but never used            no-unused-vars
+  10:3   warning  'HiLockClosed' is defined but never used             no-unused-vars
+  11:3   warning  'HiOutlineGlobeAlt' is defined but never used        no-unused-vars
+  14:51  warning  'addAccount' is defined but never used               no-unused-vars
+  17:10  warning  'HiOutlineLink' is defined but never used            no-unused-vars
+  18:8   warning  'WalletConnectPasteModal' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\shared\components\ui\Button.jsx
+  5:8  warning  'React' is defined but never used    no-unused-vars
+  6:8  warning  'Spinner' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\shared\components\ui\CandlestickChart.jsx
+  1:8  warning  'React' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\shared\components\ui\Input.jsx
+  5:8   warning  'React' is defined but never used       no-unused-vars
+  6:10  warning  'HiEye' is defined but never used       no-unused-vars
+  6:17  warning  'HiEyeSlash' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\shared\components\ui\Modal.jsx
+  5:8   warning  'React' is defined but never used            no-unused-vars
+  6:10  warning  'motion' is defined but never used           no-unused-vars
+  6:18  warning  'AnimatePresence' is defined but never used  no-unused-vars
+  7:10  warning  'HiXMark' is defined but never used          no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\shared\components\ui\Spinner.jsx
+  5:8  warning  'React' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\src\store\middleware\analyticsMiddleware.js
+  14:11  warning  'hasBackedUp' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\client\tests\unit\CryptoEngine.test.js
+  1:32  warning  'beforeEach' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\fetch_tx.js
+  29:32  warning  'reject' is defined but never used  no-unused-vars
+  41:18  warning  'e' is defined but never used       no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\parse_logs.js
+  7:7  warning  'tx' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\fetch_ethers.js
+  6:11  warning  'provider' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\scripts\seedAdmin.js
+  1:8  warning  'mongoose' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\server.js
+  18:14  warning  'dbError' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\controllers\admin.controller.js
+  5:8  warning  'Admin' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\controllers\admin.swap.controller.js
+  3:8  warning  'AppConfig' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\controllers\auth.controller.js
+  138:12  warning  'err' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\controllers\swap.controller.js
+   2:8   warning  'AppConfig' is defined but never used          no-unused-vars
+  14:53  warning  'slippage' is assigned a value but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\middleware\adminAuth.js
+  28:12  warning  'error' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\middleware\auditMiddleware.js
+  25:27  warning  'responseBody' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\middleware\errorHandler.js
+  44:45  warning  '_next' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\middleware\security.js
+   62:19  warning  'req' is defined but never used    no-unused-vars
+   62:24  warning  'res' is defined but never used    no-unused-vars
+  106:12  warning  'error' is defined but never used  no-unused-vars
+  128:12  warning  'error' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\routes\auth.routes.js
+  171:14  warning  'error' is defined but never used  no-unused-vars
+
+C:\Users\yoges\OneDrive\Desktop\CryptoWallet\server\src\services\pricingService.js
+  70:12  warning  'err' is defined but never used  no-unused-vars
+  89:12  warning  'err' is defined but never used  no-unused-vars
+
+✖ 506 problems (58 errors, 448 warnings)
+

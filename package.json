@@ -22,8 +22,8 @@
     "test:client": "cd client && npm run test",
     "test:server": "cd server && npm run test",
     "test:e2e": "cd tests && npx playwright test",
-    "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint . --ext .js,.jsx --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,jsx,json,css,md}\"",
     "seed": "cd server && node seed/index.js",
     "setup": "npm install && cd client && npm install && cd ../server && npm install && cd ../admin && npm install"
