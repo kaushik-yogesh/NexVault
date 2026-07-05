@@ -22,6 +22,7 @@ export default function UnlockScreen() {
   const [password, setPassword] = useState('');
   const [attempts, setAttempts] = useState(0);
   const [turnstileToken, setTurnstileToken] = useState(null);
+  const [autoTriggered, setAutoTriggered] = useState(false);
 
   useEffect(() => {
     dispatch(checkBiometricStatus());
@@ -66,6 +67,18 @@ export default function UnlockScreen() {
       navigate(`/dashboard${location.search}`);
     }
   };
+
+  useEffect(() => {
+    if (hasBiometricEnabled && !autoTriggered && isInitialized && !isUnlocked) {
+      setAutoTriggered(true);
+      dispatch(clearError());
+      dispatch(unlockWithBiometric()).then((result) => {
+        if (unlockWithBiometric.fulfilled.match(result)) {
+          navigate(`/dashboard${location.search}`);
+        }
+      });
+    }
+  }, [hasBiometricEnabled, autoTriggered, isInitialized, isUnlocked, dispatch, navigate, location.search]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full px-6">
